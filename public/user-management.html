@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการผู้ใช้งาน - EasyGrow</title>
+    
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <script src="js/user-management.js" defer></script>
+</head>
+<body>
+    <button class="hamburger-btn" id="mobileMenuBtn">☰</button>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">
+                <img src="/images/logo.png" alt="EasyGrow Logo">
+            </div>
+            <div class="logo-text">
+                <h2>EasyGrow</h2>
+                <p></p>
+            </div>
+        </div>
+
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" ><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
+                <li><a href="vegetable-library.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
+                <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
+                <li><a href="watering.html"><span class="nav-icon-box">💧</span> <span>การรดน้ำ</span></a></li>
+                <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
+                <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
+                <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
+                <li class="admin-only"><a href="user-management.html" class="active"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
+            </ul>
+
+        <div class="sidebar-footer">
+            
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar">👤</div>
+                <div class="user-info">
+                    <h4 id="sidebarUserName">กำลังโหลด...</h4>
+                    <span id="sidebarUserRole">...</span>
+                </div>
+            </div>
+
+            <button id="logoutBtn" class="btn-logout-full">
+                <svg class="logout-icon-svg" viewBox="0 0 24 24">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                </svg>
+                <span>ออกจากระบบ</span>
+            </button>
+
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header-section">
+            <h1>จัดการผู้ใช้งาน 👥</h1>
+            <p>จัดการบัญชีผู้ใช้และกำหนดสิทธิ์การเข้าถึง</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: #e8f5e9; color: #2e7d32;">👤</div>
+                <div class="stat-info">
+                    <h3 id="statTotal">0</h3>
+                    <p>ผู้ใช้ทั้งหมด</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: #e3f2fd; color: #1565c0;">🛡️</div>
+                <div class="stat-info">
+                    <h3 id="statAdmins">0</h3>
+                    <p>ผู้ดูแลระบบ</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background-color: #fff3e0; color: #ef6c00;">🌱</div>
+                <div class="stat-info">
+                    <h3 id="statRegular">0</h3>
+                    <p>ผู้ใช้ทั่วไป</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 15px;">
+            <div class="action-bar">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchUser" placeholder="ค้นหาชื่อหรืออีเมล...">
+                </div>
+                <button class="btn-add" id="btnAddUser">
+                    <span>+</span> เพิ่มผู้ใช้งาน
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ผู้ใช้งาน</th>
+                            <th>อีเมล</th>
+                            <th>สถานะ</th>
+                            <th>วันที่เข้าร่วม</th>
+                            <th>จำนวนผักที่ปลูก</th>
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="userModal">
+        <div class="modal-content">
+            <h2 style="color: #1a4d2e; margin-top: 0;">เพิ่มผู้ใช้งานใหม่</h2>
+            <form id="addUserForm">
+                <div class="form-group">
+                    <label>ชื่อ-นามสกุล</label>
+                    <input type="text" id="newUserName" class="form-control" required placeholder="เช่น สมชาย รักดี">
+                </div>
+                <div class="form-group">
+                    <label>อีเมล</label>
+                    <input type="email" id="newUserEmail" class="form-control" required placeholder="somchai@example.com">
+                </div>
+                <div class="form-group">
+                    <label>สถานะ</label>
+                    <select id="newUserRole" class="form-control">
+                        <option value="user">ผู้ใช้ทั่วไป</option>
+                        <option value="admin">ผู้ดูแลระบบ</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" id="btnCancel">ยกเลิก</button>
+                    <button type="submit" class="btn-submit">เพิ่มผู้ใช้</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

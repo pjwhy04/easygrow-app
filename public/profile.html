@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรไฟล์ของฉัน - EasyGrow</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/profile.js" defer></script>
+</head>
+<body>
+    <button class="hamburger-btn" id="mobileMenuBtn">☰</button>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">
+                <img src="/images/logo.png" alt="EasyGrow Logo">
+            </div>
+            <div class="logo-text">
+                <h2>EasyGrow</h2>
+                <p></p>
+            </div>
+        </div>
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" ><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
+                <li><a href="vegetable-library.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
+                <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
+                <li><a href="watering.html"><span class="nav-icon-box">💧</span> <span>การรดน้ำ</span></a></li>
+                <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
+                <li><a href="profile.html" class="active"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
+                <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
+                <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
+            </ul>
+        <div class="sidebar-footer">
+            
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar">👤</div>
+                <div class="user-info">
+                    <h4 id="sidebarUserName">กำลังโหลด...</h4>
+                    <span id="sidebarUserRole">...</span>
+                </div>
+            </div>
+
+            <button id="logoutBtn" class="btn-logout-full">
+                <svg class="logout-icon-svg" viewBox="0 0 24 24">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                </svg>
+                <span>ออกจากระบบ</span>
+            </button>
+
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header-section">
+            <h1>โปรไฟล์ของฉัน 👤</h1>
+            <p>จัดการบัญชีและดูสถิติการปลูกของคุณ</p>
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-card left-card">
+                <div class="profile-img-wrapper">
+                    <img id="profileImageDisplay" src="https://via.placeholder.com/150" alt="Profile">
+                    <label for="profileUpload" class="camera-icon">📷</label>
+                    <input type="file" id="profileUpload" accept="image/*" style="display:none">
+                </div>
+                <h2 id="displayHugeName">กำลังโหลด...</h2>
+                <span class="role-badge" id="displayRole">ผู้ใช้งาน</span>
+                
+                <div class="left-card-details">
+                    <p>✉️ <span id="displayEmailSmall">...</span></p>
+                    <p>📅 สมาชิกตั้งแต่ <span id="displayJoinDate">...</span></p>
+                    <p>🌱 ปลูกไปแล้ว <span id="displayTotalPlants">0</span> ต้น</p>
+                </div>
+            </div>
+
+            <div class="profile-card right-card">
+                <div id="viewMode">
+                    <div class="card-header-row">
+                        <h3>ข้อมูลส่วนตัว</h3>
+                        <button class="btn-edit-profile" onclick="toggleEditMode(true)">แก้ไขโปรไฟล์</button>
+                    </div>
+                    <div class="info-row">
+                        <div><label>ชื่อ-นามสกุล</label><div class="info-box" id="displayName">...</div></div>
+                        <div><label>อีเมล</label><div class="info-box" id="displayEmail">...</div></div>
+                    </div>
+
+                    <h3 style="margin-top:30px">สถิติการปลูก</h3>
+                    <div class="stats-boxes">
+                        <div class="stat-box green"><span class="icon">🌱</span><h2 id="statGrowing">0</h2><p>กำลังปลูก</p></div>
+                        <div class="stat-box brown"><span class="icon">📈</span><h2 id="statTotal">0</h2><p>ปลูกทั้งหมด</p></div>
+                        <div class="stat-box yellow"><span class="icon">🧺</span><h2 id="statReady">0</h2><p>พร้อมเก็บ</p></div>
+                        <div class="stat-box dark"><span class="icon">✅</span><h2 id="statHarvested">0</h2><p>เก็บเกี่ยวแล้ว</p></div>
+                    </div>
+
+                    <div class="achievement-banner">
+                        🏆 <strong>ความสำเร็จที่ปลดล็อก!</strong><br>
+                        คุณปลูกผักไปแล้ว <span id="bannerTotal">0</span> ต้น! เก่งมากครับ ทำต่อไปนะ!
+                    </div>
+                </div>
+
+                <div id="editMode" style="display: none;">
+                    <div class="card-header-row">
+                        <h3>แก้ไขข้อมูลส่วนตัว</h3>
+                        <button class="btn-cancel-edit" onclick="toggleEditMode(false)">ยกเลิก</button>
+                    </div>
+                    <form id="updateProfileForm">
+                        <div class="form-group">
+                            <label>ชื่อ-นามสกุล</label>
+                            <input type="text" id="editName" class="form-control">
+                        </div>
+                        
+                        <h3 style="margin-top:20px; font-size:1rem; color:#666;">เปลี่ยนรหัสผ่าน (เว้นว่างหากไม่เปลี่ยน)</h3>
+                        <div class="form-group">
+                            <label>รหัสผ่านปัจจุบัน</label>
+                            <input type="password" id="currentPassword" class="form-control" placeholder="ยืนยันรหัสเดิม">
+                        </div>
+                        <div class="form-group-row">
+                            <div style="flex:1">
+                                <label>รหัสผ่านใหม่</label>
+                                <input type="password" id="newPassword" class="form-control">
+                            </div>
+                            <div style="flex:1">
+                                <label>ยืนยันรหัสผ่านใหม่</label>
+                                <input type="password" id="confirmNewPassword" class="form-control">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-save-profile">บันทึกการเปลี่ยนแปลง</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

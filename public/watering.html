@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การรดน้ำต้นไม้ - EasyGrow</title>
+    
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <script src="js/watering.js" defer></script>
+</head>
+<body>
+    <button class="hamburger-btn" id="mobileMenuBtn">☰</button>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">
+                <img src="/images/logo.png" alt="EasyGrow Logo">
+            </div>
+            <div class="logo-text">
+                <h2>EasyGrow</h2>
+                <p></p>
+            </div>
+        </div>
+
+            <ul class="nav-menu">
+                <li><a href="dashboard.html" ><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
+                <li><a href="vegetable-library.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
+                <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
+                <li><a href="watering.html" class="active"><span class="nav-icon-box">💧</span> <span>การรดน้ำ</span></a></li>
+                <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
+                <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
+                <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
+                <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
+            </ul>
+
+        <div class="sidebar-footer">
+            
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar">👤</div>
+                <div class="user-info">
+                    <h4 id="sidebarUserName">กำลังโหลด...</h4>
+                    <span id="sidebarUserRole">...</span>
+                </div>
+            </div>
+
+            <button id="logoutBtn" class="btn-logout-full">
+                <svg class="logout-icon-svg" viewBox="0 0 24 24">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                </svg>
+                <span>ออกจากระบบ</span>
+            </button>
+
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <div class="header-section-water">
+            <div class="header-icon">🚿</div>
+            <div class="header-text">
+                <h1>การรดน้ำต้นไม้</h1>
+                <p>จัดการต้นไม้ที่ต้องรดน้ำวันนี้และบันทึกการรดน้ำเพื่อให้ระบบช่วยเตือนในครั้งถัดไป</p>
+            </div>
+        </div>
+
+        <div class="watering-banner">
+            <span class="banner-highlight" id="bannerTitle">กำลังโหลดข้อมูล...</span>
+            <span class="banner-sub" id="bannerSub">กรุณาบันทึกการรดน้ำเมื่อเสร็จสิ้นแล้ว</span>
+        </div>
+
+        <div class="watering-grid" id="wateringGrid">
+            <div class="empty-state">
+                กำลังโหลดรายการต้นไม้...
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>
