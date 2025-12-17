@@ -1588,3 +1588,41 @@ tr:hover { background-color: #fafafa; }
     /* contain = ย่อรูปให้เห็นครบทั้งรูป (แต่อาจมีที่ว่างเหลือในวงกลม) */
     object-fit: cover; 
 }
+
+/* =========================================
+   Game Controller Styles (เพิ่มใหม่)
+   ========================================= */
+
+/* สร้างกล่องครอบปุ่มเดินโดยเฉพาะ เพื่อให้ห่างกันเยอะๆ */
+.movement-controls {
+    display: flex;
+    justify-content: center; /* จัดกึ่งกลาง */
+    gap: 120px !important;   /* ⭐ ระยะห่าง (แก้เลขนี้ถ้าอยากให้ห่างอีก) */
+    margin-top: 20px;
+    padding-bottom: 20px;
+}
+
+/* ปรับปุ่มกดให้ใหญ่ๆ กลมๆ กดง่ายบนมือถือ */
+.movement-controls .game-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;      /* ทำเป็นวงกลม */
+    font-size: 30px;         /* ไอคอนใหญ่ขึ้น */
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4CAF50; /* สีเขียว (แก้ได้) */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    
+    /* สำคัญมาก: ป้องกันมือถือซูมเวลากดย้ำๆ */
+    touch-action: manipulation; 
+    -webkit-user-select: none; /* ห้าม copy text */
+    user-select: none;
+}
+
+/* เอฟเฟกต์ตอนกด */
+.movement-controls .game-btn:active {
+    transform: scale(0.95);
+    background-color: #388E3C;
+}

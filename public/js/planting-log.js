@@ -288,3 +288,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     renderBoard();
 });
+
+// ==========================================
+// 🍔 Mobile Menu Logic
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (mobileBtn && sidebar && mobileOverlay) {
+        // ฟังก์ชันเปิด/ปิด เมนู
+        const toggleMenu = () => {
+            sidebar.classList.toggle('active');
+            mobileOverlay.classList.toggle('active');
+        };
+
+        // กดปุ่มขีดสามขีด
+        mobileBtn.addEventListener('click', toggleMenu);
+
+        // กดที่ว่างๆ (Overlay) เพื่อปิดเมนู
+        mobileOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+        });
+    }
+});
+

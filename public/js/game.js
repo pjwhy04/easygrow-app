@@ -1,6 +1,6 @@
 /**
  * js/game.js
- * Game Logic: Harvest Rush (Updated Profile Image Support)
+ * Game Logic: Harvest Rush (Fixed Mobile Controls: Hold to Move)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,12 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const user = JSON.parse(storedUser);
 
     // ==========================================
-    // ⭐ 1. Setup Sidebar (แก้ไขให้โชว์รูปโปรไฟล์)
+    // 1. Setup Sidebar (แสดงรูปโปรไฟล์)
     // ==========================================
     document.getElementById('sidebarUserName').textContent = user.name || 'ผู้ใช้งาน';
     document.getElementById('sidebarUserRole').textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
     
-    // แสดงรูปโปรไฟล์ (ถ้ามี)
     const avatarEl = document.getElementById('userAvatar');
     if (user.image_url) {
         avatarEl.innerHTML = `<img src="${user.image_url}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
@@ -28,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
     }
 
-    // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
         if(confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
             localStorage.removeItem('easygrowUser');
@@ -37,13 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // 2. Setup Canvas & Context
+    // 2. Game Setup
     // ==========================================
     const canvas = document.getElementById('canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    // === Game State ===
+    // Game State
     let gameState = {
         score: 0,
         lives: 5,
@@ -55,14 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
         nextSpawnFrame: 0 
     };
 
-    // === Game Objects ===
+    // Game Objects
     const player = {
         x: canvas.width / 2 - 40,
         y: canvas.height - 85,
         width: 80,
         height: 50,
-        speed: 8,
-        dx: 0,
+        speed: 8, // ความเร็วในการวิ่ง
         emoji: '🧺'
     };
 
@@ -74,32 +71,60 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     const badItem = { type: 'rotten', score: 0, emoji: '🤢' };
 
-    // === Controls ===
-    const keys = { ArrowLeft: false, ArrowRight: false, a: false, d: false };
+    // ==========================================
+    // 🎮 Controls (แก้ใหม่: ระบบกดค้าง)
+    // ==========================================
+    
+    // 1. ตัวแปรจำสถานะการกด
+    const controls = {
+        left: false,
+        right: false
+    };
 
+    // 2. ควบคุมด้วยคีย์บอร์ด (คอมพิวเตอร์)
     document.addEventListener('keydown', (e) => {
-        if (keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key] = true;
+        if (e.key === 'ArrowLeft' || e.key === 'a') controls.left = true;
+        if (e.key === 'ArrowRight' || e.key === 'd') controls.right = true;
     });
     document.addEventListener('keyup', (e) => {
-        if (keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key] = false;
+        if (e.key === 'ArrowLeft' || e.key === 'a') controls.left = false;
+        if (e.key === 'ArrowRight' || e.key === 'd') controls.right = false;
     });
 
-    // Mobile Controls
-    const leftBtn = document.getElementById('leftBtn');
-    const rightBtn = document.getElementById('rightBtn');
+    // 3. ควบคุมด้วยปุ่มบนหน้าจอ (มือถือ)
+    const leftBtn = document.getElementById('leftBtn'); // หรือ btnLeft เช็ค ID ใน HTML ให้ตรง
+    const rightBtn = document.getElementById('rightBtn'); // หรือ btnRight เช็ค ID ใน HTML ให้ตรง
 
-    const handleMobilePress = (dir) => { player.dx = dir * player.speed; };
-    const handleMobileRelease = () => { player.dx = 0; };
+    const setupMobileBtn = (btn, dir) => {
+        if (!btn) return;
 
-    const addTouch = (elem, dir) => {
-        if (!elem) return;
-        elem.addEventListener('mousedown', () => handleMobilePress(dir));
-        elem.addEventListener('mouseup', handleMobileRelease);
-        elem.addEventListener('touchstart', (e) => { e.preventDefault(); handleMobilePress(dir); });
-        elem.addEventListener('touchend', (e) => { e.preventDefault(); handleMobileRelease(); });
+        // ฟังก์ชันเริ่มกด
+        const startPress = (e) => {
+            if(e.cancelable) e.preventDefault(); // กันจอสั่น/เลื่อน
+            if (dir === 'left') controls.left = true;
+            if (dir === 'right') controls.right = true;
+        };
+
+        // ฟังก์ชันปล่อยมือ
+        const endPress = (e) => {
+            if(e.cancelable) e.preventDefault();
+            if (dir === 'left') controls.left = false;
+            if (dir === 'right') controls.right = false;
+        };
+
+        // Event Listeners (รองรับทั้งเมาส์และนิ้วสัมผัส)
+        btn.addEventListener('mousedown', startPress);
+        btn.addEventListener('mouseup', endPress);
+        btn.addEventListener('mouseleave', endPress);
+        
+        // Touch events (สำคัญสำหรับมือถือ)
+        btn.addEventListener('touchstart', startPress, { passive: false });
+        btn.addEventListener('touchend', endPress);
     };
-    addTouch(leftBtn, -1);
-    addTouch(rightBtn, 1);
+
+    // ติดตั้งปุ่ม (เช็คว่า ID ปุ่มตรงกับ HTML ของคุณไหม ถ้า HTML ใช้ btnLeft ให้แก้ข้างบน)
+    setupMobileBtn(leftBtn || document.getElementById('btnLeft'), 'left');
+    setupMobileBtn(rightBtn || document.getElementById('btnRight'), 'right');
 
     // UI Buttons
     const startBtn = document.getElementById('start');
@@ -108,7 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startBtn) startBtn.addEventListener('click', startGame);
     if (pauseBtn) pauseBtn.addEventListener('click', togglePause);
 
-    // === UI Functions ===
+    // ==========================================
+    // UI Update Function
+    // ==========================================
     function updateUI() {
         const scoreEl = document.getElementById('score');
         const highEl = document.getElementById('high');
@@ -137,7 +164,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // === Core Game Logic ===
+    // ==========================================
+    // Core Game Logic
+    // ==========================================
     function spawnItem() {
         const size = 50;
         const x = Math.random() * (canvas.width - size);
@@ -164,18 +193,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function update() {
         if (!gameState.isRunning || gameState.isPaused) return;
 
-        // Player Move
-        if (keys.ArrowLeft || keys.a) player.dx = -player.speed;
-        else if (keys.ArrowRight || keys.d) player.dx = player.speed;
+        // ⭐ การเคลื่อนที่ (เช็คจากตัวแปร controls แทน)
+        if (controls.left) {
+            player.x -= player.speed;
+        }
+        if (controls.right) {
+            player.x += player.speed;
+        }
         
-        player.x += player.dx;
+        // กันตกขอบจอ
         if (player.x < 0) player.x = 0;
         if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
-
-        // Stop move if no input
-        if (leftBtn && rightBtn && !leftBtn.matches(':active') && !rightBtn.matches(':active')) { 
-             if (!keys.ArrowLeft && !keys.a && !keys.ArrowRight && !keys.d) player.dx = 0;
-        }
 
         // Spawning
         gameState.spawnTimer++;
@@ -264,6 +292,10 @@ document.addEventListener('DOMContentLoaded', () => {
         gameState.nextSpawnFrame = 0;
         items = [];
         player.x = canvas.width / 2 - 40;
+        
+        // รีเซ็ตปุ่มค้าง
+        controls.left = false;
+        controls.right = false;
 
         if (gameState.gameLoopId) cancelAnimationFrame(gameState.gameLoopId);
         loop();
@@ -299,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.textAlign = 'start';
     }
 
-    // === Initial Draw ===
+    // Initial Draw
     updateUI();
     ctx.fillStyle = '#fff';
     ctx.font = '30px sans-serif';
@@ -318,16 +350,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.sidebar');
 
     if (mobileBtn && sidebar && mobileOverlay) {
-        // ฟังก์ชันเปิด/ปิด เมนู
         const toggleMenu = () => {
             sidebar.classList.toggle('active');
             mobileOverlay.classList.toggle('active');
         };
 
-        // กดปุ่มขีดสามขีด
         mobileBtn.addEventListener('click', toggleMenu);
-
-        // กดที่ว่างๆ (Overlay) เพื่อปิดเมนู
         mobileOverlay.addEventListener('click', () => {
             sidebar.classList.remove('active');
             mobileOverlay.classList.remove('active');
