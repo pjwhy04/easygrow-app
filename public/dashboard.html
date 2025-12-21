@@ -17,23 +17,19 @@
             </div>
             <div class="logo-text">
                 <h2>EasyGrow</h2>
-                <p></p>
             </div>
         </div>
-
-            <ul class="nav-menu">
-                <li><a href="dashboard.html" class="active"><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
-                <li><a href="vegetable-library.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
-                <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
-                <li><a href="watering.html"><span class="nav-icon-box">💧</span> <span>การรดน้ำ</span></a></li>
-                <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
-                <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
-                <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
-                <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
-            </ul>
-
+        <ul class="nav-menu">
+            <li><a href="dashboard.html" class="active"><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
+            <li><a href="vegetable-library.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
+            <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
+            <li><a href="watering.html"><span class="nav-icon-box">💧</span> <span>การรดน้ำ</span></a></li>
+            <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
+            <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
+            <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
+            <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
+        </ul>
         <div class="sidebar-footer">
-            
             <div class="user-profile">
                 <div class="avatar" id="userAvatar">👤</div>
                 <div class="user-info">
@@ -41,14 +37,9 @@
                     <span id="sidebarUserRole">...</span>
                 </div>
             </div>
-
             <button id="logoutBtn" class="btn-logout-full">
-                <svg class="logout-icon-svg" viewBox="0 0 24 24">
-                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-                </svg>
                 <span>ออกจากระบบ</span>
             </button>
-
         </div>
     </aside>
 
@@ -58,34 +49,42 @@
             <p>นี่คือภาพรวมสวนของคุณในวันนี้</p>
         </div>
 
-        <div class="summary-row">
+        <div class="summary-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px;">
             
             <div class="card">
-                <div class="std-icon">🧺</div>
-                <div class="summary-label">พร้อมเก็บเกี่ยว</div> <div class="summary-count" id="countHarvest">0</div>
-                <div class="summary-desc">ต้นที่โตเต็มที่แล้ว</div>
+                <div class="std-icon" style="background:#e3f2fd; color:#1565c0;">📊</div>
+                <div class="summary-label">จำนวนทั้งหมด</div>
+                <div class="summary-count" id="countTotal">0</div>
+                <div class="summary-desc">รายการปลูกทั้งหมด</div>
             </div>
 
             <div class="card">
-                <div class="std-icon">🌱</div>
+                <div class="std-icon" style="background:#e8f5e9; color:#2e7d32;">🌱</div>
                 <div class="summary-label">กำลังเติบโต</div>
                 <div class="summary-count" id="countGrowing">0</div>
                 <div class="summary-desc">อยู่ในระยะดูแล</div>
             </div>
 
             <div class="card">
-                <div class="std-icon">📊</div>
-                <div class="summary-label">ปลูกทั้งหมด</div>
-                <div class="summary-count" id="countPlanted">0</div>
-                <div class="summary-desc">สถิติรวม 7 วันล่าสุด</div>
+                <div class="std-icon" style="background:#fff3e0; color:#ef6c00;">🧺</div>
+                <div class="summary-label">พร้อมเก็บเกี่ยว</div>
+                <div class="summary-count" id="countHarvest">0</div>
+                <div class="summary-desc">ต้นที่โตเต็มที่แล้ว</div>
             </div>
 
             <div class="card">
-                <div class="std-icon">💧</div>
-                <div class="summary-label">ต้องรดน้ำวันนี้</div>
+                <div class="std-icon" style="background:#f5f5f5; color:#616161;">✅</div>
+                <div class="summary-label">เก็บเกี่ยวแล้ว</div>
+                <div class="summary-count" id="countHarvested">0</div>
+                <div class="summary-desc">ที่เก็บเกี่ยวไปแล้ว</div>
+            </div>
+
+            <div class="card">
+                <div class="std-icon" style="background:#e1f5fe; color:#0288d1;">💧</div>
+                <div class="summary-label">ต้องรดน้ำ</div>
                 <div class="summary-count" id="countWater">0</div>
-                <button class="btn-water" onclick="window.location.href='watering.html'" style="margin-top:10px; width:100%;">
-                    ดูรายชื่อต้นไม้
+                <button class="btn-water" onclick="window.location.href='watering.html'" style="margin-top:10px; width:100%; border-radius:8px; padding:5px;">
+                    ดูรายชื่อ
                 </button>
             </div>
 
@@ -100,17 +99,7 @@
                 <li class="loading-message">กำลังโหลดข้อมูล...</li>
             </ul>
         </div>
-
-        <div class="recent-activity-section quick-actions-container">
-            <h3 class="quick-actions-title">เมนูลัด</h3>
-            <div class="quick-actions-row">
-                <button class="action-btn-large btn-primary" onclick="window.location.href='planting-log.html?action=add'">+ เพิ่มการปลูกใหม่</button>
-                <button class="action-btn-large" onclick="window.location.href='vegetable-library.html'">ดูรายการผัก</button>
-                <button class="action-btn-large" onclick="window.location.href='manage-vegetables.html'">จัดการคลังข้อมูล</button>
-            </div>
-        </div>
-
-    </main>
-
+        
+        </main>
 </body>
 </html>

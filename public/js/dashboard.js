@@ -1,9 +1,9 @@
 /**
- * dashboard.js (ฉบับเชื่อมต่อ Node.js Server & MySQL)
+ * dashboard.js (ฉบับแก้ไข: 5 สถานะ และคำนวณจำนวนจริง)
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Auth Guard (ตรวจสอบสิทธิ์)
+    // 1. Auth Guard
     const storedUser = localStorage.getItem('easygrowUser');
     if (!storedUser) { window.location.href = 'index.html'; return; }
     const user = JSON.parse(storedUser);
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const avatarEl = document.getElementById('userAvatar');
     if (user.image_url) {
         avatarEl.innerHTML = `<img src="${user.image_url}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-        avatarEl.style.backgroundColor = 'transparent'; // ลบสีพื้นหลังเดิม
+        avatarEl.style.backgroundColor = 'transparent';
     } else {
         avatarEl.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
     }
@@ -31,38 +31,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // ============================================
-    // 2. Fetch Data from Server
+    // 2. Fetch Data
     // ============================================
     let plantingLog = [];
-
     try {
         const res = await fetch(`/api/planting-log?email=${user.email}`);
         if (res.ok) {
             plantingLog = await res.json();
-        } else {
-            console.error("Failed to fetch logs");
         }
     } catch (error) {
         console.error("Network error:", error);
     }
 
     // ============================================
-    // 3. Calculate Summaries
+    // 3. Calculate Summaries (คำนวณแบบ 5 สถานะ)
     // ============================================
-    
-    // Helper: เช็คว่าอยู่ในช่วง 7 วันที่ผ่านมาหรือไม่
-    const isWithinLast7Days = (dateString) => {
-        if (!dateString) return false;
-        const targetDate = new Date(dateString);
-        const today = new Date();
-        const diffTime = Math.abs(today - targetDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-        return diffDays <= 7;
-    };
-
-    let readyCount = 0;
+    let totalCount = plantingLog.length; // จำนวนทั้งหมดที่มีในระบบ
     let growingCount = 0;
-    let recentPlantedCount = 0;
+    let readyCount = 0;
+    let harvestedCount = 0;
     let wateringCount = 0;
 
     const todayDate = new Date();
@@ -71,13 +58,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     plantingLog.forEach(item => {
         const statusLower = (item.status || '').toLowerCase();
         
-        // นับสถานะ
-        if (statusLower === 'ready') readyCount++;
+        // นับตามสถานะจริง
         if (statusLower === 'growing') growingCount++;
-        // ใช้ planted_date จาก DB
-        if (statusLower === 'planted' && isWithinLast7Days(item.planted_date)) recentPlantedCount++;
+        if (statusLower === 'ready') readyCount++;
+        if (statusLower === 'harvested') harvestedCount++;
 
-        // นับการรดน้ำ
+        // นับการรดน้ำ (เฉพาะต้นที่ยังไม่ได้เก็บเกี่ยว)
         if (statusLower !== 'harvested') {
             const lastWaterStr = item.last_watered_date || item.planted_date;
             const lastWaterDate = new Date(lastWaterStr);
@@ -93,19 +79,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Update DOM (Summary Cards)
-    safeSetText('countHarvest', readyCount);
+    // อัปเดตตัวเลขบนหน้าจอ (Mapping ID ให้ตรงกับ HTML ใหม่)
+    safeSetText('countTotal', totalCount);
     safeSetText('countGrowing', growingCount);
-    safeSetText('countPlanted', recentPlantedCount);
-    
-    // Update Watering Card
+    safeSetText('countHarvest', readyCount);
+    safeSetText('countHarvested', harvestedCount);
     safeSetText('countWater', wateringCount);
-    const waterDesc = document.getElementById('descWater');
-    if (waterDesc) {
-        waterDesc.textContent = wateringCount > 0 
-            ? `วันนี้มี ${wateringCount} ต้นที่ต้องรดน้ำ`
-            : "วันนี้ยังไม่มีต้นไม้ที่ต้องรดน้ำ";
-    }
 
     // ============================================
     // 4. Recent Activity List
@@ -113,18 +92,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const activityList = document.getElementById('recentActivityList');
     if (activityList) {
         activityList.innerHTML = ''; 
-
         if (plantingLog.length === 0) {
             activityList.innerHTML = '<li style="padding:20px; text-align:center; color:#888;">ยังไม่มีประวัติการปลูก</li>';
         } else {
-            // เรียงลำดับจากใหม่ไปเก่า (ใช้ planted_date)
             const sortedLog = [...plantingLog].sort((a, b) => new Date(b.planted_date) - new Date(a.planted_date));
             const recentItems = sortedLog.slice(0, 5);
 
             recentItems.forEach(item => {
                 const li = document.createElement('li');
                 li.className = 'activity-item';
-
                 let statusClass = 'status-planted';
                 let statusText = 'เพิ่งปลูก';
 
@@ -138,7 +114,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     year: 'numeric', month: 'short', day: 'numeric'
                 });
 
-                // ใช้ vegetable_name จาก DB
                 li.innerHTML = `
                     <div class="plant-icon-box">🌱</div>
                     <div class="activity-details">
@@ -153,31 +128,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Helper เพื่อป้องกัน Error ถ้า element หาไม่เจอ
 function safeSetText(id, text) {
     const el = document.getElementById(id);
     if (el) el.textContent = text;
 }
 
-// ==========================================
-// 🍔 Mobile Menu Logic
-// ==========================================
+// Mobile Menu Logic (เหมือนเดิม)
 document.addEventListener('DOMContentLoaded', () => {
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const mobileOverlay = document.getElementById('mobileOverlay');
     const sidebar = document.querySelector('.sidebar');
-
     if (mobileBtn && sidebar && mobileOverlay) {
-        // ฟังก์ชันเปิด/ปิด เมนู
         const toggleMenu = () => {
             sidebar.classList.toggle('active');
             mobileOverlay.classList.toggle('active');
         };
-
-        // กดปุ่มขีดสามขีด
         mobileBtn.addEventListener('click', toggleMenu);
-
-        // กดที่ว่างๆ (Overlay) เพื่อปิดเมนู
         mobileOverlay.addEventListener('click', () => {
             sidebar.classList.remove('active');
             mobileOverlay.classList.remove('active');
