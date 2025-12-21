@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>คลังข้อมูลผัก - EasyGrow</title>
+    
     <link rel="stylesheet" href="css/styles.css">
+    
     <script src="js/library.js" defer></script>
 </head>
 <body>
@@ -30,7 +32,7 @@
             <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
             <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
         </ul>
-        </aside>
+    </aside>
 
     <main class="main-content">
         <header class="top-header">
@@ -39,26 +41,46 @@
                 <input type="text" id="searchInput" placeholder="ค้นหาผักที่สนใจ...">
             </div>
             
-            <div class="header-profile" id="headerProfile">
+            <div class="profile-dropdown-container">
+                <div class="profile-trigger" id="profileTrigger">
+                    <div class="profile-avatar-top" id="headerAvatarContainer">
+                        </div>
+                    <span class="dropdown-arrow">▼</span>
                 </div>
+                
+                <div class="dropdown-menu" id="profileDropdown">
+                    <div class="dropdown-header" id="dropdownUserInfo">
+                        </div>
+                    <hr>
+                    <a href="profile.html" class="dropdown-item">👤 โปรไฟล์ของฉัน</a>
+                    <a href="#" class="dropdown-item" id="logoutBtnTop" style="color: #d32f2f;">🚪 ออกจากระบบ</a>
+                </div>
+            </div>
         </header>
 
-        <section class="promo-banner">
-            <div class="promo-content">
-                <h1>ก้าวแรกสู่การเป็นชาวสวนมืออาชีพ 🌱</h1>
-                <p>EasyGrow ช่วยให้คุณเรียนรู้วิธีการปลูกผักแต่ละชนิดอย่างละเอียด ติดตามการเจริญเติบโต และแจ้งเตือนการดูแลอย่างแม่นยำ</p>
-                <div id="promoActions">
+        <div class="landing-wrapper">
+            
+            <section class="promo-banner">
+                <div class="promo-content">
+                    <span class="badge-new">ใหม่! ระบบผู้ช่วยปลูก</span>
+                    <h1>ก้าวแรกสู่การเป็นชาวสวนมืออาชีพ 🌱</h1>
+                    <p>EasyGrow ช่วยให้คุณเรียนรู้วิธีการปลูกผักแต่ละชนิดอย่างละเอียด ติดตามการเจริญเติบโต และแจ้งเตือนการดูแลอย่างแม่นยำ</p>
+                    <div id="promoActions">
+                        </div>
+                </div>
+            </section>
+
+            <section class="library-main">
+                <div class="section-title-box">
+                    <h2>📚 คลังข้อมูลผักอัจฉริยะ</h2>
+                    <p>สำรวจและเรียนรู้วิธีการปลูกผักที่คุณสนใจได้ทันที</p>
+                </div>
+
+                <div id="vegetableGrid" class="veg-grid">
                     </div>
-            </div>
-        </section>
-
-        <div class="header-section">
-            <h1>คลังข้อมูลผัก 🥕</h1>
-            <p>สำรวจและเรียนรู้เกี่ยวกับผักชนิดต่างๆ ที่คุณสามารถปลูกได้</p>
+            </section>
+            
         </div>
-
-        <div id="vegetableGrid" class="veg-grid">
-            </div>
     </main>
 </body>
 </html>

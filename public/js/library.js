@@ -1,75 +1,101 @@
 /**
- * library.js (ฉบับสมบูรณ์: ย้ายเมนูไปขวาบน + รูปต้นอ่อนเริ่มต้น + ระบบโปรโมท)
+ * library.js 
+ * ฉบับสมบูรณ์: ระบบ Profile Dropdown + รูปต้นอ่อนเริ่มต้น + เชื่อมต่อส่วนโปรโมท
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Check Authentication
+    // 1. ตรวจสอบสถานะการเข้าสู่ระบบ
     const storedUser = localStorage.getItem('easygrowUser');
     let user = null;
     if (storedUser) {
         try {
             user = JSON.parse(storedUser);
         } catch (e) {
+            console.error("User data corrupted");
             localStorage.removeItem('easygrowUser');
         }
     }
 
-    // 2. Element Selection
-    const headerProfile = document.getElementById('headerProfile');
+    // 2. อ้างอิง Element ต่างๆ
+    const profileTrigger = document.getElementById('profileTrigger');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const headerAvatarContainer = document.getElementById('headerAvatarContainer');
+    const dropdownUserInfo = document.getElementById('dropdownUserInfo');
     const promoActions = document.getElementById('promoActions');
     const gridContainer = document.getElementById('vegetableGrid');
     const searchInput = document.getElementById('searchInput');
 
-    // เส้นทางรูปภาพต้นอ่อน (โลโก้เว็บ) สำหรับใช้เป็นรูปเริ่มต้น
+    // เส้นทางรูปภาพต้นอ่อนสำหรับใช้เป็นรูปเริ่มต้น (Default Avatar)
     const sproutIcon = "/images/logo.png"; 
 
     // ============================================================
-    // 3. Setup Top Header & Profile (ย้ายมาจาก Sidebar)
+    // 3. Setup Header & Profile Dropdown
     // ============================================================
     function setupHeader() {
-        if (!headerProfile) return;
-
         if (user) {
-            // กรณีเป็นสมาชิก: แสดงชื่อ, บทบาท และรูปโปรไฟล์ (ถ้าไม่มีใช้ต้นอ่อน)
+            // กรณีเป็นสมาชิก: ตั้งค่ารูปโปรไฟล์และข้อมูลใน Dropdown
             const avatarUrl = user.image_url ? user.image_url : sproutIcon;
             
-            headerProfile.innerHTML = `
-                <div class="user-info-top">
+            if (headerAvatarContainer) {
+                headerAvatarContainer.innerHTML = `<img src="${avatarUrl}" alt="Profile" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+
+            if (dropdownUserInfo) {
+                dropdownUserInfo.innerHTML = `
                     <h4>${user.name || 'ชาวสวน'}</h4>
                     <span>${user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน'}</span>
-                </div>
-                <div class="profile-avatar-top" onclick="window.location.href='profile.html'">
-                    <img src="${avatarUrl}" alt="Profile" style="width:100%; height:100%; object-fit:cover;">
-                </div>
-                <button id="logoutBtnTop" class="btn-logout-top" title="ออกจากระบบ">ออก</button>
-            `;
+                `;
+            }
 
-            // เพิ่ม Event ออกจากระบบ
-            document.getElementById('logoutBtnTop').onclick = () => {
-                if (confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
-                    localStorage.removeItem('easygrowUser');
-                    window.location.href = 'index.html';
-                }
-            };
+            // ระบบเปิด-ปิด Dropdown เมื่อคลิกที่รูปโปรไฟล์
+            if (profileTrigger && profileDropdown) {
+                profileTrigger.onclick = (e) => {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('active');
+                };
+
+                // คลิกที่อื่นในหน้าจอเพื่อปิด Dropdown
+                document.addEventListener('click', () => {
+                    profileDropdown.classList.remove('active');
+                });
+            }
+
+            // การจัดการปุ่มออกจากระบบภายใน Dropdown
+            const logoutBtn = document.getElementById('logoutBtnTop');
+            if (logoutBtn) {
+                logoutBtn.onclick = (e) => {
+                    e.preventDefault();
+                    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
+                        localStorage.removeItem('easygrowUser');
+                        window.location.href = 'index.html';
+                    }
+                };
+            }
 
             // ซ่อนเมนู Admin ใน Sidebar ถ้าไม่ใช่ Admin
             if (user.role !== 'admin') {
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
             }
         } else {
-            // กรณีผู้เยี่ยมชม: แสดงปุ่มเข้าสู่ระบบ และปุ่มสมัครใน Banner
-            headerProfile.innerHTML = `
-                <a href="index.html" style="text-decoration:none; color:#4CAF50; font-weight:bold; font-size:0.9rem;">เข้าสู่ระบบ</a>
-            `;
+            // กรณีผู้เยี่ยมชม (Guest): แสดงปุ่มเข้าสู่ระบบแทน Dropdown
+            const container = document.querySelector('.profile-dropdown-container');
+            if (container) {
+                container.innerHTML = `
+                    <a href="index.html" style="text-decoration:none; color:#4CAF50; font-weight:bold; font-size:0.9rem; padding: 5px 10px;">เข้าสู่ระบบ</a>
+                `;
+            }
             
+            // แสดงปุ่มสมัครสมาชิกในส่วน Banner โปรโมท
             if (promoActions) {
                 promoActions.innerHTML = `
                     <a href="register.html" class="btn-promo-reg">เข้าร่วมสมาชิกฟรี</a>
                 `;
             }
             
-            // ซ่อนเมนู Admin สำหรับ Guest
+            // ซ่อนเมนู Admin และ Sidebar Footer สำหรับ Guest
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            const sidebarFooter = document.querySelector('.sidebar-footer');
+            if (sidebarFooter) sidebarFooter.style.display = 'none';
         }
     }
 
@@ -83,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const vegetables = await response.json();
 
-            // กรองข้อมูลตามที่พิมพ์ในช่องค้นหา
+            // กรองข้อมูลผักตามที่พิมพ์ในช่องค้นหา
             const filtered = vegetables.filter(veg => 
                 veg.name.toLowerCase().includes(filterText.toLowerCase())
             );

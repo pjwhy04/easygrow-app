@@ -1740,14 +1740,18 @@ tr:hover { background-color: #fafafa; }
     display: none !important;
 }
 
-/* 6. ปุ่ม Logout แบบไอคอนมุมขวาบน */
-.logout-btn-top {
-    background: #fff1f0;
-    border: 1px solid #ffa39e;
-    color: #cf1322;
-    padding: 5px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    margin-left: 10px;
-}
+
+
+/* --- วางต่อท้ายไฟล์ styles.css --- */
+.profile-dropdown-container { position: relative; display: inline-block; }
+.profile-trigger { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 5px 10px; border-radius: 30px; transition: 0.3s; }
+.profile-trigger:hover { background-color: #f0f7f0; }
+.dropdown-menu { position: absolute; top: 55px; right: 0; background: white; min-width: 200px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #eee; display: none; z-index: 1000; padding: 10px 0; }
+.dropdown-menu.active { display: block; animation: fadeIn 0.2s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.dropdown-item { display: block; padding: 12px 20px; text-decoration: none; color: #444; font-size: 0.9rem; }
+.dropdown-item:hover { background-color: #f1f8e9; color: #4CAF50; }
+.landing-wrapper { display: flex; flex-direction: column; gap: 0; }
+.promo-banner { border-radius: 20px 20px 0 0; margin-bottom: 0; }
+.library-main { background: white; border-radius: 0 0 20px 20px; padding: 40px; border: 1px solid #f0f0f0; border-top: none; }
+.badge-new { display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 15px; border: 1px solid rgba(255, 255, 255, 0.3); }
