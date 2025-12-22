@@ -34,7 +34,7 @@
                 <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
             </ul>
 
-        <div class="sidebar-footer">
+        <!-- <div class="sidebar-footer">
             
             <div class="user-profile">
                 <div class="avatar" id="userAvatar">👤</div>
@@ -51,10 +51,32 @@
                 <span>ออกจากระบบ</span>
             </button>
 
-        </div>
+        </div> -->
     </aside>
 
     <main class="main-content">
+        <header class="top-bar">
+            <div class="profile-dropdown-container">
+                <div class="profile-trigger" id="profileTrigger">
+                    <div class="avatar-small" id="userAvatarHeader">👤</div>
+                    <span id="headerUserName">ผู้ใช้งาน</span>
+                    <span class="arrow-down">▼</span>
+                </div>
+                
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-header">
+                        <h4 id="menuUserName">กำลังโหลด...</h4>
+                        <span id="menuUserRole">...</span>
+                    </div>
+                    <hr>
+                    <a href="profile.html">👤 โปรไฟล์ของฉัน</a>
+                    <button id="logoutBtnHeader" class="btn-logout-dropdown">
+                        <span>🚪 ออกจากระบบ</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
         <div class="header-section">
             <h1>คลังข้อมูลผัก 🥕</h1>
             <p>สำรวจและเรียนรู้เกี่ยวกับผักชนิดต่างๆ ที่คุณสามารถปลูกได้</p>

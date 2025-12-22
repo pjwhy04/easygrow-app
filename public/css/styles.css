@@ -1626,3 +1626,90 @@ tr:hover { background-color: #fafafa; }
     transform: scale(0.95);
     background-color: #388E3C;
 } 
+
+/* จัดตำแหน่งส่วนหัว */
+.top-bar {
+    display: flex;
+    justify-content: flex-end; /* ดันไปทางขวา */
+    margin-bottom: 20px;
+}
+
+.profile-dropdown-container {
+    position: relative;
+    cursor: pointer;
+}
+
+/* ปุ่มโปรไฟล์ */
+.profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    padding: 5px 15px;
+    border-radius: 30px;
+    border: 1px solid #eee;
+    transition: 0.3s;
+}
+
+.profile-trigger:hover {
+    background: #f1f8e9;
+}
+
+.avatar-small {
+    width: 32px;
+    height: 32px;
+    background: #e8f5e9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.arrow-down { font-size: 0.7rem; color: #888; }
+
+/* เมนู Dropdown */
+.dropdown-menu {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    width: 220px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border: 1px solid #eee;
+    display: none; /* ซ่อนไว้ก่อน */
+    z-index: 1000;
+    padding: 10px 0;
+}
+
+/* คลาสที่ใช้สั่งให้แสดงผลเมื่อกด */
+.dropdown-menu.active {
+    display: block;
+}
+
+/* ภายในเมนู */
+.dropdown-header { padding: 10px 20px; }
+.dropdown-header h4 { margin: 0; color: #1a4d2e; }
+.dropdown-header span { font-size: 0.75rem; color: #888; }
+
+.dropdown-menu a, .btn-logout-dropdown {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #555;
+    font-size: 0.9rem;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.dropdown-menu a:hover, .btn-logout-dropdown:hover {
+    background-color: #f5f5f5;
+    color: #4CAF50;
+}
+
+.btn-logout-dropdown:hover { color: #d32f2f; }
