@@ -1,0 +1,250 @@
+/* =========================================
+   1. GLOBAL & VARIABLES
+   ========================================= */
+:root {
+    --primary-green: #2e7d32;
+    --light-green: #4caf50;
+    --soft-green: #e8f5e9;
+    --accent-orange: #ff9800;
+    --error-red: #d32f2f;
+    --text-dark: #2d3436;
+    --text-muted: #636e72;
+    --white: #ffffff;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --border-radius: 16px;
+    --transition: all 0.3s ease;
+}
+
+.landing-body {
+    margin: 0;
+    font-family: 'Kanit', sans-serif;
+    background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* =========================================
+   2. LAYOUT (SPLIT SCREEN)
+   ========================================= */
+.landing-container {
+    display: flex;
+    max-width: 1100px;
+    width: 100%;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.info-side {
+    flex: 1;
+    background: var(--primary-green);
+    color: var(--white);
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-side {
+    flex: 1;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: var(--white);
+}
+
+/* =========================================
+   3. LEFT SIDE (BRANDING & FEATURES)
+   ========================================= */
+.info-side h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    line-height: 1.1;
+}
+
+.tagline {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 40px;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 40px;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    font-size: 1rem;
+}
+
+.feature-icon {
+    font-size: 1.4rem;
+    background: rgba(255, 255, 255, 0.2);
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+}
+
+.guest-cta {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 30px;
+}
+
+.btn-guest {
+    display: inline-block;
+    padding: 12px 20px;
+    background: var(--white);
+    color: var(--primary-green);
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-guest:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* =========================================
+   4. RIGHT SIDE (LOGIN FORM)
+   ========================================= */
+.login-box h2 {
+    color: var(--text-dark);
+    font-size: 2rem;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    color: var(--text-muted);
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.input-wrapper input:focus {
+    outline: none;
+    border-color: var(--light-green);
+    box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+}
+
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary-green);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 10px;
+}
+
+.btn-login:hover {
+    background: var(--light-green);
+    transform: translateY(-2px);
+}
+
+.btn-login:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* =========================================
+   5. MESSAGES & ANIMATIONS
+   ========================================= */
+.error-message {
+    background: #ffebee;
+    color: var(--error-red);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    border-left: 4px solid var(--error-red);
+    display: none; /* คุมด้วย JS */
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 25px;
+    color: var(--text-muted);
+}
+
+.register-link a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-10px); }
+    40%, 80% { transform: translateX(10px); }
+}
+
+/* =========================================
+   6. RESPONSIVE DESIGN
+   ========================================= */
+@media (max-width: 900px) {
+    .landing-container {
+        flex-direction: column;
+    }
+    .info-side, .login-side {
+        padding: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-side {
+        display: none; /* ซ่อนข้อมูลเพื่อเน้นฟอร์มบนมือถือขนาดเล็ก */
+    }
+    .landing-body {
+        padding: 10px;
+    }
+}

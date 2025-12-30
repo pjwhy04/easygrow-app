@@ -1,0 +1,308 @@
+/* =========================================
+   1. GLOBAL & LAYOUT
+   ========================================= */
+:root {
+    --primary-green: #4CAF50;
+    --dark-green: #2e7d32;
+    --light-green: #f1f8e9;
+    --text-main: #333;
+    --text-light: #666;
+    --card-bg: #ffffff;
+    --shadow-soft: 0 4px 15px rgba(0,0,0,0.08);
+    --shadow-hover: 0 8px 25px rgba(0,0,0,0.15);
+    --border-radius-lg: 16px;
+    --border-radius-md: 10px;
+    --transition-fast: 0.3s ease;
+    --top-header-height: 70px;
+}
+
+/* ⭐ แก้ไข: ปรับสีตัวหนังสือตรงโลโก้ Sidebar ให้เป็นสีเขียวแบรนด์เหมือนหน้าอื่น ⭐ */
+.sidebar .logo-text h2 {
+    color: var(--dark-green) !important;
+}
+
+/* ปรับปรุงพื้นที่เนื้อหาหลัก ป้องกันการโดน Sidebar เบียดทับ */
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--top-header-height);
+    padding: 30px;
+    width: calc(100% - var(--sidebar-width)); 
+    box-sizing: border-box;
+    transition: var(--transition-fast);
+}
+
+/* =========================================
+   2. PROMO & HERO SECTION (ส่วนโปรโมทเว็บไซต์)
+   ========================================= */
+.promo-section {
+    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    color: white;
+    padding: 35px;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 40px;
+    box-shadow: 0 10px 20px rgba(46, 125, 50, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.promo-section h2 {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    margin: 0;
+}
+
+.promo-section p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.promo-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.promo-tag {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+/* =========================================
+   3. HEADER & SEARCH GROUP (วางขนานกันในบรรทัดเดียว)
+   ========================================= */
+/* ⭐ ส่วนนี้ทำให้หัวข้อกับช่องค้นหาอยู่ระดับเดียวกัน ⭐ */
+.library-header-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.header-section {
+    margin-bottom: 0 !important;
+    flex-shrink: 0;
+}
+
+.header-section h1 {
+    font-size: 1.8rem;
+    margin: 0;
+    color: var(--dark-green);
+}
+
+.header-section p {
+    margin: 5px 0 0 0;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.search-container {
+    margin-bottom: 0 !important;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: 0.3s;
+}
+
+.search-input:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+}
+
+/* =========================================
+   4. VEGETABLE GRID & CARDS
+   ========================================= */
+.veg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.veg-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-fast);
+    cursor: pointer;
+    border: 1px solid #f0f0f0;
+}
+
+.veg-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-hover);
+}
+
+.veg-img-container {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background-color: #f9f9f9;
+}
+
+.veg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-fast);
+}
+
+.veg-card:hover .veg-img {
+    transform: scale(1.1);
+}
+
+.veg-content {
+    padding: 20px;
+}
+
+.veg-name {
+    margin: 0 0 15px 0;
+    font-size: 1.3rem;
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.veg-details {
+    list-style: none !important;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.veg-details li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.season-tag {
+    display: inline-block;
+    background: var(--light-green);
+    color: var(--dark-green);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+/* =========================================
+   5. DROPDOWN PROFILE (เรียบเนียน & ตัวหนังสือสีแดง)
+   ========================================= */
+.dropdown-menu {
+    list-style: none !important;
+    padding: 8px 0 !important;
+    margin: 0;
+    display: none;
+    position: absolute;
+    top: 65px;
+    right: 30px;
+    width: 220px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border: 1px solid #eee;
+    z-index: 1001;
+}
+
+.dropdown-menu.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-item {
+    text-decoration: none !important;
+    color: var(--text-main) !important;
+    padding: 12px 20px;
+    display: block;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f9f9f9;
+}
+
+/* ⭐ ออกจากระบบ: บังคับสีแดงและลบขีดเส้นใต้ ⭐ */
+.dropdown-item.logout {
+    color: #d32f2f !important;
+    border-top: 1px solid #f5f5f5;
+    margin-top: 5px;
+}
+
+.dropdown-item.logout:hover {
+    background-color: #fff5f5;
+}
+
+/* =========================================
+   6. RESPONSIVE ADJUSTMENTS
+   ========================================= */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 80px 15px 20px 15px;
+    }
+
+    .library-header-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .search-container {
+        max-width: 100%;
+    }
+
+    .promo-section {
+        padding: 25px;
+        border-radius: 12px;
+    }
+
+    .veg-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .veg-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .promo-section {
+        border-radius: 0;
+        margin: -20px -15px 20px -15px;
+    }
+}

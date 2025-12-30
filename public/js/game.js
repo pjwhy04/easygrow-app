@@ -1,68 +1,162 @@
 /**
  * js/game.js
- * Game Logic: Harvest Rush (Fixed Mobile Controls: Hold to Move)
+ * - ระบบมินิเกม Harvest Rush (Final Version)
+ * - ย้ายปุ่มเสียงไป HTML แล้ว
+ * - ผักตกช้าลง (Easy Mode)
+ * - ปรับการเกิดผักให้ห่างกันมากขึ้น (ไม่รกรุงรัง)
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Auth Guard
-    const storedUser = localStorage.getItem('easygrowUser');
-    if (!storedUser) { window.location.href = 'index.html'; return; }
-    const user = JSON.parse(storedUser);
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("🚀 Game Page Loaded");
+    const webLogo = '/images/logo.png'; 
 
     // ==========================================
-    // 1. Setup Sidebar (แสดงรูปโปรไฟล์)
+    // 0. แก้ไขสีโลโก้ Sidebar
     // ==========================================
-    document.getElementById('sidebarUserName').textContent = user.name || 'ผู้ใช้งาน';
-    document.getElementById('sidebarUserRole').textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
-    
-    const avatarEl = document.getElementById('userAvatar');
-    if (user.image_url) {
-        avatarEl.innerHTML = `<img src="${user.image_url}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-        avatarEl.style.backgroundColor = 'transparent';
-    } else {
-        avatarEl.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+    const sidebarLogoText = document.querySelector('.sidebar .logo-text h2');
+    if (sidebarLogoText) {
+        sidebarLogoText.style.setProperty('color', '#2e7d32', 'important'); 
+        sidebarLogoText.style.fontWeight = '600';
+    }
+
+    // ==========================================
+    // 1. Auth Guard
+    // ==========================================
+    const storedUser = localStorage.getItem('easygrowUser');
+    if (!storedUser) { 
+        window.location.href = 'login.html'; 
+        return; 
+    }
+
+    let user = null;
+    try {
+        user = JSON.parse(storedUser);
+    } catch (e) {
+        console.error("User data corrupted");
+        localStorage.removeItem('easygrowUser');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // ==========================================
+    // 2. Setup Header UI & Mobile Menu
+    // ==========================================
+    setupHeaderUI(user, webLogo);
+    setupMobileMenu();
+
+    // ==========================================
+    // 3. Centralized Watering Check
+    // ==========================================
+    if (window.syncWateringStatus) {
+        await window.syncWateringStatus(user.email, false).catch(e => console.warn(e));
+    }
+
+    // ==========================================
+    // 4. Start Game Engine
+    // ==========================================
+    setupMiniGame();
+});
+
+// --- Helper Functions ---
+
+function setupHeaderUI(user, webLogo) {
+    const headerUserName = document.getElementById('headerUserName');
+    const userAvatarHeader = document.getElementById('userAvatarHeader');
+    const menuUserName = document.getElementById('menuUserName');
+    const menuUserRole = document.getElementById('menuUserRole');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const profileTrigger = document.getElementById('profileTrigger');
+    const logoutBtnHeader = document.getElementById('logoutBtnHeader');
+
+    // User Info
+    if (headerUserName) headerUserName.textContent = user.name || 'ผู้ใช้งาน';
+    if (menuUserName) menuUserName.textContent = user.name || 'ผู้ใช้งาน';
+    if (menuUserRole) menuUserRole.textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
+
+    if (userAvatarHeader) {
+        const profileImg = user.image_url ? user.image_url : webLogo;
+        userAvatarHeader.innerHTML = `
+            <img src="${profileImg}" 
+                 onerror="this.src='${webLogo}'" 
+                 style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        userAvatarHeader.style.backgroundColor = 'transparent';
     }
 
     if (user.role !== 'admin') {
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.admin-only').forEach(el => el.style.setProperty('display', 'none', 'important'));
     }
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        if(confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
-            localStorage.removeItem('easygrowUser');
-            window.location.href = 'index.html';
-        }
+    if (profileTrigger && dropdownMenu) {
+        profileTrigger.onclick = (e) => { 
+            e.stopPropagation(); 
+            dropdownMenu.classList.toggle('active'); 
+        };
+    }
+    
+    window.addEventListener('click', () => {
+        if (dropdownMenu) dropdownMenu.classList.remove('active');
     });
 
-    // ==========================================
-    // 2. Game Setup
-    // ==========================================
+    if (logoutBtnHeader) {
+        logoutBtnHeader.onclick = (e) => {
+            e.preventDefault();
+            if (confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
+                localStorage.removeItem('easygrowUser');
+                window.location.href = 'login.html';
+            }
+        };
+    }
+}
+
+function setupMobileMenu() {
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const sidebar = document.querySelector('.sidebar');
+    if (mobileBtn && sidebar && mobileOverlay) {
+        const toggle = () => { sidebar.classList.toggle('active'); mobileOverlay.classList.toggle('active'); };
+        mobileBtn.onclick = toggle;
+        mobileOverlay.onclick = toggle;
+    }
+}
+
+/**
+ * Game Engine: Harvest Rush
+ */
+function setupMiniGame() {
     const canvas = document.getElementById('canvas');
-    if (!canvas) return;
+    if (!canvas) {
+        console.warn("Canvas element not found. Game skipped.");
+        return;
+    }
     const ctx = canvas.getContext('2d');
 
-    // Game State
+    // --- 🎵 Sound System Setup ---
+    const bgm = new Audio('sounds/bgm.mp3'); 
+    bgm.loop = true;   
+    bgm.volume = 0.5;  
+    let isMuted = false;
+
+    // --- Buttons Reference ---
+    const startBtn = document.getElementById('start');
+    const pauseBtn = document.getElementById('pause');
+    const soundBtn = document.getElementById('btnSound'); // ปุ่มเสียงจาก HTML
+
+    // Game Variables
     let gameState = {
-        score: 0,
-        lives: 5,
-        highScore: localStorage.getItem('harvestHighScore') || 0,
-        isRunning: false,
-        isPaused: false,
+        score: 0, 
+        lives: 5, 
+        highScore: parseInt(localStorage.getItem('harvestHighScore') || '0'),
+        isRunning: false, 
+        isPaused: false, 
         gameLoopId: null,
-        spawnTimer: 0,
+        spawnTimer: 0, 
         nextSpawnFrame: 0 
     };
 
-    // Game Objects
-    const player = {
-        x: canvas.width / 2 - 40,
-        y: canvas.height - 85,
-        width: 80,
-        height: 50,
-        speed: 8, // ความเร็วในการวิ่ง
-        emoji: '🧺'
-    };
-
+    // Player Configuration
+    const player = { x: canvas.width / 2 - 40, y: canvas.height - 85, width: 80, height: 50, speed: 8, emoji: '🧺' };
+    
+    // Items Configuration
     let items = [];
     const itemTypes = [
         { type: 'carrot', score: 10, emoji: '🥕' },
@@ -71,17 +165,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     const badItem = { type: 'rotten', score: 0, emoji: '🤢' };
 
-    // ==========================================
-    // 🎮 Controls (แก้ใหม่: ระบบกดค้าง)
-    // ==========================================
-    
-    // 1. ตัวแปรจำสถานะการกด
-    const controls = {
-        left: false,
-        right: false
-    };
+    // Controls
+    const controls = { left: false, right: false };
 
-    // 2. ควบคุมด้วยคีย์บอร์ด (คอมพิวเตอร์)
+    // Keyboard Listeners
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft' || e.key === 'a') controls.left = true;
         if (e.key === 'ArrowRight' || e.key === 'd') controls.right = true;
@@ -91,274 +178,223 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'ArrowRight' || e.key === 'd') controls.right = false;
     });
 
-    // 3. ควบคุมด้วยปุ่มบนหน้าจอ (มือถือ)
-    const leftBtn = document.getElementById('leftBtn'); // หรือ btnLeft เช็ค ID ใน HTML ให้ตรง
-    const rightBtn = document.getElementById('rightBtn'); // หรือ btnRight เช็ค ID ใน HTML ให้ตรง
-
-    const setupMobileBtn = (btn, dir) => {
+    // Touch/Mouse Button Listeners (Mobile)
+    const setupMobileBtn = (btnId, dir) => {
+        const btn = document.getElementById(btnId);
         if (!btn) return;
-
-        // ฟังก์ชันเริ่มกด
-        const startPress = (e) => {
-            if(e.cancelable) e.preventDefault(); // กันจอสั่น/เลื่อน
-            if (dir === 'left') controls.left = true;
-            if (dir === 'right') controls.right = true;
-        };
-
-        // ฟังก์ชันปล่อยมือ
-        const endPress = (e) => {
-            if(e.cancelable) e.preventDefault();
-            if (dir === 'left') controls.left = false;
-            if (dir === 'right') controls.right = false;
-        };
-
-        // Event Listeners (รองรับทั้งเมาส์และนิ้วสัมผัส)
-        btn.addEventListener('mousedown', startPress);
-        btn.addEventListener('mouseup', endPress);
-        btn.addEventListener('mouseleave', endPress);
         
-        // Touch events (สำคัญสำหรับมือถือ)
-        btn.addEventListener('touchstart', startPress, { passive: false });
-        btn.addEventListener('touchend', endPress);
+        const start = (e) => { 
+            if(e.cancelable) e.preventDefault(); 
+            controls[dir] = true; 
+        };
+        const end = (e) => { 
+            if(e.cancelable) e.preventDefault(); 
+            controls[dir] = false; 
+        };
+
+        btn.addEventListener('mousedown', start);
+        btn.addEventListener('mouseup', end);
+        btn.addEventListener('mouseleave', end); 
+        btn.addEventListener('touchstart', start, { passive: false });
+        btn.addEventListener('touchend', end);
     };
 
-    // ติดตั้งปุ่ม (เช็คว่า ID ปุ่มตรงกับ HTML ของคุณไหม ถ้า HTML ใช้ btnLeft ให้แก้ข้างบน)
-    setupMobileBtn(leftBtn || document.getElementById('btnLeft'), 'left');
-    setupMobileBtn(rightBtn || document.getElementById('btnRight'), 'right');
+    setupMobileBtn('btnLeft', 'left');
+    setupMobileBtn('btnRight', 'right');
 
-    // UI Buttons
-    const startBtn = document.getElementById('start');
-    const pauseBtn = document.getElementById('pause');
+    // 1. ปุ่มเริ่มเกม
+    if (startBtn) {
+        startBtn.onclick = () => {
+            if (gameState.isRunning) return; 
 
-    if (startBtn) startBtn.addEventListener('click', startGame);
-    if (pauseBtn) pauseBtn.addEventListener('click', togglePause);
+            gameState.score = 0;
+            gameState.lives = 5;
+            gameState.isRunning = true;
+            gameState.isPaused = false;
+            items = []; 
+            player.x = canvas.width / 2 - 40;
+            
+            updateUI(); 
+            updateLivesUI();
 
-    // ==========================================
-    // UI Update Function
-    // ==========================================
-    function updateUI() {
-        const scoreEl = document.getElementById('score');
-        const highEl = document.getElementById('high');
-        const livesDiv = document.getElementById('lives');
-        
-        if (scoreEl) scoreEl.textContent = gameState.score;
-        if (highEl) highEl.textContent = gameState.highScore;
-        
-        if (livesDiv) {
-            livesDiv.innerHTML = '';
-            for(let i=0; i<5; i++) {
-                const dot = document.createElement('span');
-                dot.className = 'life-dot ' + (i < gameState.lives ? '' : 'life-lost');
-                livesDiv.appendChild(dot);
+            // 🎵 เล่นเพลง
+            if (!isMuted) {
+                bgm.currentTime = 0;
+                bgm.play().catch(e => console.warn("Audio autoplay blocked:", e));
             }
-        }
 
-        if (startBtn) {
-            if (gameState.isRunning) {
-                startBtn.textContent = 'เริ่มใหม่ (Restart)';
-                startBtn.style.background = 'var(--danger)';
-            } else {
-                startBtn.textContent = 'เริ่มเกม ▶';
-                startBtn.style.background = 'var(--accent)';
-            }
-        }
+            if (gameState.gameLoopId) cancelAnimationFrame(gameState.gameLoopId);
+            gameLoop();
+        };
     }
 
-    // ==========================================
-    // Core Game Logic
-    // ==========================================
-    function spawnItem() {
-        const size = 50;
-        const x = Math.random() * (canvas.width - size);
-        
-        let itemConfig;
-        if (Math.random() < 0.2) {
-            itemConfig = badItem;
-        } else {
-            const rand = Math.random();
-            if (rand < 0.5) itemConfig = itemTypes[0];
-            else if (rand < 0.8) itemConfig = itemTypes[1];
-            else itemConfig = itemTypes[2];
-        }
+    // 2. ปุ่มพักเกม (Pause)
+    if (pauseBtn) {
+        pauseBtn.onclick = () => {
+            if (!gameState.isRunning) return;
+            
+            gameState.isPaused = !gameState.isPaused;
+            pauseBtn.textContent = gameState.isPaused ? "เล่นต่อ ▶" : "พักเกม";
+            
+            if (gameState.isPaused) {
+                bgm.pause();
+            } else {
+                if (!isMuted) bgm.play();
+            }
+        };
+    }
 
-        items.push({
-            x: x,
-            y: -50,
-            size: size,
-            speed: 3 + Math.random() * 1.5, 
-            ...itemConfig
-        });
+    // 3. ปุ่มเปิด/ปิดเสียง (Sound Toggle)
+    if (soundBtn) {
+        soundBtn.onclick = () => {
+            isMuted = !isMuted;
+            if (isMuted) {
+                bgm.pause();
+                soundBtn.textContent = "🔇 ปิดเสียง";
+                soundBtn.style.color = "#ff5252"; 
+                soundBtn.style.borderColor = "#ff5252";
+            } else {
+                if (gameState.isRunning && !gameState.isPaused) bgm.play();
+                soundBtn.textContent = "🔊 เปิดเสียง";
+                soundBtn.style.color = ""; 
+                soundBtn.style.borderColor = "";
+            }
+        };
+    }
+
+    function gameLoop() {
+        if (!gameState.isRunning) return;
+
+        if (!gameState.isPaused) {
+            update(); 
+            draw(); 
+            updateUI();
+        }
+        
+        gameState.gameLoopId = requestAnimationFrame(gameLoop);
     }
 
     function update() {
-        if (!gameState.isRunning || gameState.isPaused) return;
-
-        // ⭐ การเคลื่อนที่ (เช็คจากตัวแปร controls แทน)
-        if (controls.left) {
-            player.x -= player.speed;
-        }
-        if (controls.right) {
-            player.x += player.speed;
-        }
+        // Player Movement
+        if (controls.left) player.x -= player.speed;
+        if (controls.right) player.x += player.speed;
         
-        // กันตกขอบจอ
+        // Boundaries
         if (player.x < 0) player.x = 0;
         if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 
-        // Spawning
+        // Spawning Items (Logic การเกิดผัก)
         gameState.spawnTimer++;
         if (gameState.spawnTimer > gameState.nextSpawnFrame) {
-            spawnItem();
+            const size = 50;
+            const itemConfig = (Math.random() < 0.2) ? badItem : itemTypes[Math.floor(Math.random() * itemTypes.length)];
+            
+            items.push({ 
+                x: Math.random() * (canvas.width - size), 
+                y: -50, 
+                size,
+                speed: 1.5 + Math.random() * 1.5, // ความเร็วการตก (ช้า)
+                ...itemConfig 
+            });
+            
             gameState.spawnTimer = 0;
-            gameState.nextSpawnFrame = Math.floor(Math.random() * 40) + 60;
+            
+            // ⭐ แก้ไขจุดนี้: เพิ่มเวลาหน่วงระหว่างผักแต่ละชิ้น ⭐
+            // เดิม: 30 + 40 (เร็วไป) -> ใหม่: 60 + 80 (ช้าลงมาก)
+            gameState.nextSpawnFrame = Math.floor(Math.random() * 60) + 80; 
         }
 
-        // Items Update
+        // Update Items Position & Collision
         for (let i = items.length - 1; i >= 0; i--) {
-            let item = items[i];
-            item.y += item.speed;
+            items[i].y += items[i].speed;
 
-            const playerHitboxY = player.y + 10;
-            
-            // Collision Check
+            // Collision Detection
             if (
-                item.x < player.x + player.width &&
-                item.x + item.size > player.x &&
-                item.y + item.size > playerHitboxY && 
-                item.y < player.y + player.height
+                items[i].x < player.x + player.width &&
+                items[i].x + items[i].size > player.x &&
+                items[i].y + items[i].size > player.y + 10 &&
+                items[i].y < player.y + player.height
             ) {
-                if (item.type === 'rotten') {
-                    gameState.lives--;
+                // Hit!
+                if (items[i].type === 'rotten') {
+                    gameState.lives--; 
+                    updateLivesUI();
                 } else {
-                    gameState.score += item.score;
+                    gameState.score += items[i].score;
                 }
-                items.splice(i, 1);
+                items.splice(i, 1); 
                 continue;
             }
 
-            // Ground Check
-            if (item.y > canvas.height) {
-                if (item.type !== 'rotten') {
-                    gameState.lives--;
+            // Missed Items
+            if (items[i].y > canvas.height) { 
+                if (items[i].type !== 'rotten') {
+                    gameState.lives--; 
+                    updateLivesUI();
                 }
-                items.splice(i, 1);
+                items.splice(i, 1); 
             }
         }
 
-        if (gameState.lives <= 0) gameOver();
+        // Game Over Condition
+        if (gameState.lives <= 0) {
+            endGame();
+        }
+    }
+
+    function endGame() {
+        gameState.isRunning = false;
+        
+        bgm.pause();
+        bgm.currentTime = 0;
+
+        if (gameState.score > gameState.highScore) {
+            gameState.highScore = gameState.score;
+            localStorage.setItem('harvestHighScore', gameState.score);
+        }
+        draw(); 
+        
+        setTimeout(() => alert(`❌ จบเกม! \nคะแนนของคุณคือ: ${gameState.score}`), 10);
+        
+        if (pauseBtn) pauseBtn.textContent = "พักเกม";
     }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw Player
-        ctx.textBaseline = 'top'; 
-        ctx.font = '60px Arial';
-        ctx.fillText(player.emoji, player.x + (player.width/2) - 30, player.y - 10);
-
-        // Draw Items
-        ctx.font = '45px Arial';
-        for (let item of items) {
-            ctx.fillText(item.emoji, item.x, item.y);
-        }
-
-        // Draw Pause Screen
-        if (gameState.isPaused && gameState.isRunning) {
-            ctx.fillStyle = 'rgba(255,255,255,0.8)';
-            ctx.fillRect(0,0,canvas.width, canvas.height);
-            ctx.fillStyle = 'var(--accent)';
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 40px sans-serif';
-            ctx.fillText("พักเกม...", canvas.width/2, canvas.height/2);
-            ctx.textAlign = 'start';
-        }
-    }
-
-    function loop() {
-        update();
-        draw();
-        updateUI();
-        if (gameState.isRunning) {
-            gameState.gameLoopId = requestAnimationFrame(loop);
-        }
-    }
-
-    function startGame() {
-        gameState.score = 0;
-        gameState.lives = 5;
-        gameState.isRunning = true;
-        gameState.isPaused = false;
-        gameState.spawnTimer = 0;
-        gameState.nextSpawnFrame = 0;
-        items = [];
-        player.x = canvas.width / 2 - 40;
         
-        // รีเซ็ตปุ่มค้าง
-        controls.left = false;
-        controls.right = false;
-
-        if (gameState.gameLoopId) cancelAnimationFrame(gameState.gameLoopId);
-        loop();
+        ctx.font = '60px Arial'; 
+        ctx.fillText(player.emoji, player.x + 10, player.y + 45);
         
-        if(startBtn) startBtn.blur();
-    }
-
-    function togglePause() {
-        if (!gameState.isRunning) return;
-        gameState.isPaused = !gameState.isPaused;
-        if (pauseBtn) pauseBtn.textContent = gameState.isPaused ? "เล่นต่อ" : "พักเกม";
-    }
-
-    function gameOver() {
-        gameState.isRunning = false;
-        cancelAnimationFrame(gameState.gameLoopId);
-        
-        if (gameState.score > gameState.highScore) {
-            gameState.highScore = gameState.score;
-            localStorage.setItem('harvestHighScore', gameState.highScore);
-        }
-        updateUI();
-
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.font = 'bold 50px sans-serif';
-        ctx.fillText("จบเกม!", canvas.width/2, canvas.height/2 - 20);
-        ctx.font = '30px sans-serif';
-        ctx.fillText("คะแนน: " + gameState.score, canvas.width/2, canvas.height/2 + 40);
-        ctx.textAlign = 'start';
-    }
-
-    // Initial Draw
-    updateUI();
-    ctx.fillStyle = '#fff';
-    ctx.font = '30px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'var(--muted)';
-    ctx.fillText("กดปุ่ม 'เริ่มเกม' เพื่อเล่น", canvas.width/2, canvas.height/2);
-    ctx.textAlign = 'start';
-});
-
-// ==========================================
-// 🍔 Mobile Menu Logic
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const mobileBtn = document.getElementById('mobileMenuBtn');
-    const mobileOverlay = document.getElementById('mobileOverlay');
-    const sidebar = document.querySelector('.sidebar');
-
-    if (mobileBtn && sidebar && mobileOverlay) {
-        const toggleMenu = () => {
-            sidebar.classList.toggle('active');
-            mobileOverlay.classList.toggle('active');
-        };
-
-        mobileBtn.addEventListener('click', toggleMenu);
-        mobileOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            mobileOverlay.classList.remove('active');
+        ctx.font = '45px Arial'; 
+        items.forEach(item => {
+            ctx.fillText(item.emoji, item.x, item.y + 40);
         });
     }
-});
+
+    function updateUI() {
+        const scoreEl = document.getElementById('score');
+        const highEl = document.getElementById('high');
+
+        if (scoreEl) scoreEl.textContent = gameState.score;
+        if (highEl) highEl.textContent = gameState.highScore;
+    }
+
+    function updateLivesUI() {
+        const livesContainer = document.getElementById('lives');
+        if (!livesContainer) return;
+        
+        livesContainer.innerHTML = ''; 
+        for (let i = 0; i < 5; i++) {
+            const dot = document.createElement('span');
+            dot.className = 'life-dot';
+            if (i >= gameState.lives) {
+                dot.classList.add('life-lost'); 
+            }
+            livesContainer.appendChild(dot);
+        }
+    }
+
+    // Initial UI Update
+    updateUI();
+    updateLivesUI();
+}

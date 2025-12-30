@@ -4,52 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>โปรไฟล์ของฉัน - EasyGrow</title>
-    <link rel="stylesheet" href="css/styles.css">
+    
+    <link rel="stylesheet" href="css/styles.css"> 
+    <link rel="stylesheet" href="css/profile-page.css">
+    
     <script src="js/profile.js" defer></script>
+    <script src="js/watering.js" defer></script>
 </head>
 <body>
     <button class="hamburger-btn" id="mobileMenuBtn">☰</button>
     <div class="mobile-overlay" id="mobileOverlay"></div>
+
     <aside class="sidebar">
         <div class="sidebar-logo">
             <div class="logo-icon">
                 <img src="/images/logo.png" alt="EasyGrow Logo">
             </div>
             <div class="logo-text">
-                <h2>EasyGrow</h2>
-                <p></p>
-            </div>
+                <h2 style="color: #2e7d32;">EasyGrow</h2> </div>
         </div>
-            <ul class="nav-menu">
-                <li><a href="dashboard.html" ><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
-                <li><a href="vegetable-library.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
-                <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
-                <li><a href="watering.html"><span class="nav-icon-box">💧</span> <span>การรดน้ำ</span></a></li>
-                <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
-                <li><a href="profile.html" class="active"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
-                <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
-                <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
-            </ul>
-        <div class="sidebar-footer">
+        
+        <ul class="nav-menu">
+            <li><a href="dashboard.html"><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
+            <li><a href="index.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
+            <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
+            <li>
+                <a href="watering.html">
+                    <span class="nav-icon-box">💧</span> 
+                    <span>การรดน้ำ</span>
+                    <span id="waterBadge" class="nav-badge" style="display:none;">0</span>
+                </a>
+            </li>
+            <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
+            <li><a href="profile.html" class="active"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
             
-            <div class="user-profile">
-                <div class="avatar" id="userAvatar">👤</div>
-                <div class="user-info">
-                    <h4 id="sidebarUserName">กำลังโหลด...</h4>
-                    <span id="sidebarUserRole">...</span>
-                </div>
-            </div>
-
-            <button id="logoutBtn" class="btn-logout-full">
-                <svg class="logout-icon-svg" viewBox="0 0 24 24">
-                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-                </svg>
-                <span>ออกจากระบบ</span>
-            </button>
-
-        </div>
+            <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
+            <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
+        </ul>
     </aside>
 
+    <header class="top-header">
+        <div class="profile-trigger" id="profileTrigger">
+            <span id="headerUserName">กำลังโหลด...</span>
+            <div class="avatar-header" id="userAvatarHeader">
+                <img src="/images/logo.png" alt="User" onerror="this.src='/images/logo.png'" id="headerAvatarImg" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-header-info">
+                <strong id="menuUserName">ชื่อผู้ใช้</strong>
+                <p id="menuUserRole">สถานะ</p>
+            </div>
+            <a href="profile.html" class="dropdown-item">โปรไฟล์ของฉัน</a>
+            <button id="logoutBtnHeader" class="dropdown-item logout">ออกจากระบบ</button>
+        </div>
+    </header>
+    
     <main class="main-content">
         <div class="header-section">
             <h1>โปรไฟล์ของฉัน 👤</h1>
@@ -59,8 +70,8 @@
         <div class="profile-grid">
             <div class="profile-card left-card">
                 <div class="profile-img-wrapper">
-                    <img id="profileImageDisplay" src="https://via.placeholder.com/150" alt="Profile">
-                    <label for="profileUpload" class="camera-icon">📷</label>
+                    <img id="profileImageDisplay" src="/images/logo.png" alt="Profile" onerror="this.src='/images/logo.png'">
+                    <label for="profileUpload" class="camera-icon" title="เปลี่ยนรูปโปรไฟล์">📷</label>
                     <input type="file" id="profileUpload" accept="image/*" style="display:none">
                 </div>
                 <h2 id="displayHugeName">กำลังโหลด...</h2>
@@ -106,15 +117,15 @@
                     <form id="updateProfileForm">
                         <div class="form-group">
                             <label>ชื่อ-นามสกุล</label>
-                            <input type="text" id="editName" class="form-control">
+                            <input type="text" id="editName" class="form-control" required>
                         </div>
                         
                         <h3 style="margin-top:20px; font-size:1rem; color:#666;">เปลี่ยนรหัสผ่าน (เว้นว่างหากไม่เปลี่ยน)</h3>
                         <div class="form-group">
                             <label>รหัสผ่านปัจจุบัน</label>
-                            <input type="password" id="currentPassword" class="form-control" placeholder="ยืนยันรหัสเดิม">
+                            <input type="password" id="currentPassword" class="form-control" placeholder="ยืนยันรหัสเดิมเพื่อความปลอดภัย">
                         </div>
-                        <div class="form-group-row">
+                        <div class="form-group-row" style="display: flex; gap: 15px;">
                             <div style="flex:1">
                                 <label>รหัสผ่านใหม่</label>
                                 <input type="password" id="newPassword" class="form-control">

@@ -1,0 +1,263 @@
+/* =========================================
+   1. VARIABLES & LAYOUT
+   ========================================= */
+:root {
+    --game-bg: #f0f4f8;
+    --panel-bg: #ffffff;
+    --accent: #4caf50;
+    --danger: #ff5252;
+    --muted: #888;
+    --shadow: 0 4px 20px rgba(0,0,0,0.1);
+    --radius: 16px;
+}
+
+.main-content-game {
+    background-color: var(--game-bg);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* คลุมพื้นที่เกมและแผงควบคุม */
+.game-wrapper-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.wrap {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* =========================================
+   2. GAME AREA (CANVAS & CANVAS PANEL)
+   ========================================= */
+.panel {
+    background: var(--panel-bg);
+    border-radius: var(--radius);
+    padding: 25px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+}
+
+.game-area {
+    flex: 2; /* พื้นที่เกมกว้างกว่าแผงคะแนน */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+}
+
+canvas {
+    background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 100%); /* ท้องฟ้า */
+    border-radius: 12px;
+    max-width: 100%;
+    height: auto;
+    border: 4px solid #fff;
+    box-shadow: 0 0 0 2px #ddd;
+}
+
+/* ปุ่มควบคุมบนหน้าจอ (สำหรับมือถือ) */
+.movement-controls {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.game-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 15px 30px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    user-select: none; /* กันการคลุมดำเวลาคลิกย้ำๆ */
+    touch-action: manipulation; /* ปรับการตอบสนองหน้าจอสัมผัส */
+    transition: transform 0.1s, filter 0.2s;
+}
+
+.game-btn:active {
+    transform: scale(0.95);
+    filter: brightness(0.9);
+}
+
+/* =========================================
+   3. SIDE PANEL (SCORE & LIVES)
+   ========================================= */
+.right {
+    flex: 1;
+    min-width: 300px;
+}
+
+.game-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: var(--muted);
+}
+
+.game-score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.score {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent);
+}
+
+/* จุดแสดงชีวิต */
+.lives-wrapper {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.life-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--danger);
+    border-radius: 50%;
+    display: inline-block;
+    transition: background 0.3s;
+}
+
+.life-lost {
+    background: #eee; /* สีเมื่อชีวิตหายไป */
+}
+
+/* ปุ่ม Start & Pause */
+.btn-full {
+    width: 100%;
+    padding: 14px;
+    font-weight: 600;
+}
+
+.btn-start-lg {
+    font-size: 1.1rem;
+    background: var(--accent);
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 2px solid #ddd;
+    color: #666;
+    margin-top: 10px;
+}
+
+.btn-ghost:hover {
+    background: #f9f9f9;
+}
+
+/* =========================================
+   4. INSTRUCTIONS & FOOTER
+   ========================================= */
+.game-desc {
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+.score-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 8px;
+}
+
+.score-list li {
+    padding: 4px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.danger { color: var(--danger); font-weight: bold; }
+.small { font-size: 0.9rem; color: var(--muted); }
+.spacer-md { height: 25px; }
+
+footer {
+    text-align: center;
+    color: #ccc;
+    font-size: 0.8rem;
+    margin-top: 20px;
+}
+
+/* =========================================
+   5. RESPONSIVE ADJUSTMENTS
+   ========================================= */
+@media (max-width: 992px) {
+    .wrap {
+        flex-direction: column;
+    }
+    .right {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .movement-controls {
+        gap: 20px;
+    }
+    .game-btn {
+        flex: 1;
+        padding: 20px; /* ขยายปุ่มให้ใหญ่ขึ้นบนมือถือ */
+    }
+}
+
+/* =========================================
+   6. DROPDOWN MENU STYLES (เพิ่มส่วนนี้)
+   ========================================= */
+.dropdown-menu {
+    position: absolute;
+    top: 60px;          /* ระยะห่างจากด้านบน */
+    right: 20px;        /* ระยะห่างจากด้านขวา */
+    background: #ffffff;
+    width: 200px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: none;      /* ซ่อนไว้เป็นค่าเริ่มต้น */
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;      /* ให้ลอยอยู่เหนือเกม */
+    border: 1px solid #eee;
+}
+
+/* ⭐ คลาสสำคัญ: เมื่อมี class active ให้แสดงผล ⭐ */
+.dropdown-menu.active {
+    display: flex;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #333;
+    font-size: 0.9rem;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+    color: var(--accent); /* สีเขียว */
+}
+
+.dropdown-item.logout {
+    color: #ff5252;
+    border-top: 1px solid #eee;
+}
+
+.dropdown-item.logout:hover {
+    background-color: #fff0f0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

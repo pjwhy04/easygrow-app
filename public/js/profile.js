@@ -1,58 +1,73 @@
+/**
+ * profile.js 
+ * - จัดการข้อมูลโปรไฟล์ (View/Edit)
+ * - จัดการรูปภาพ (Upload) พร้อมระบบรูปสำรองเป็นโลโก้เว็บ (/images/logo.png)
+ * - ⭐ ปรับปรุง: เรียกใช้ Master Logic จาก watering.js สำหรับระบบแจ้งเตือนรดน้ำ ⭐
+ * - ควบคุม Header Dropdown มุมขวาบน (เรียบเนียน ไม่มีไอคอน/จุด)
+ */
+
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Auth Guard
+    // ⭐ กำหนดพาธโลโก้เว็บสำหรับใช้เป็นรูปสำรอง ⭐
+    const DEFAULT_LOGO = '/images/logo.png';
+
+    // ==========================================
+    // 1. Auth Guard & Initial Data
+    // ==========================================
     const storedUser = localStorage.getItem('easygrowUser');
-    if (!storedUser) { window.location.href = 'index.html'; return; }
+    if (!storedUser) { 
+        window.location.href = 'login.html'; 
+        return; 
+    }
     const currentUser = JSON.parse(storedUser);
 
-    // 2. Setup Sidebar (เรียกฟังก์ชันที่ปรับปรุงแล้ว)
-    setupSidebar(currentUser);
+    // ==========================================
+    // 2. Setup Header & Master Notification Logic
+    // ==========================================
+    // ตั้งค่าส่วนหัว (Header)
+    setupHeaderProfile(currentUser, DEFAULT_LOGO);
+    
+    // ⭐ CENTRALIZED WATERING CHECK (Master Logic) ⭐
+    // เรียกใช้ฟังก์ชันจาก watering.js เพื่ออัปเดต Badge และเช็ค Pop-up เพียงจุดเดียว
+    // 🔴 แก้ไข: เปลี่ยน true เป็น false เพื่อป้องกัน Popup เด้งรบกวนทุกครั้งที่โหลดหน้า
+    if (window.syncWateringStatus) {
+        await window.syncWateringStatus(currentUser.email, false);
+    }
 
-    // 3. Fetch Profile Data (ดึงข้อมูลล่าสุดจาก Server)
-    await loadProfileData(currentUser.email);
+    // ==========================================
+    // 3. Load Profile Page Data (แสดงข้อมูลในหน้า Profile)
+    // ==========================================
+    await loadProfileData(currentUser.email, DEFAULT_LOGO);
 
+    // ==========================================
     // 4. Event Listeners
-    // ปุ่มอัปโหลดรูป
+    // ==========================================
+    
+    // ปุ่มเลือกรูปภาพ
     const profileUpload = document.getElementById('profileUpload');
     if (profileUpload) {
-        profileUpload.addEventListener('change', (e) => handleImageUpload(e, currentUser.email));
+        profileUpload.addEventListener('change', (e) => handleImageUpload(e, currentUser.email, DEFAULT_LOGO));
     }
     
-    // ฟอร์มแก้ไขข้อมูล
+    // ฟอร์มบันทึกการแก้ไขข้อมูล
     const updateForm = document.getElementById('updateProfileForm');
     if (updateForm) {
         updateForm.addEventListener('submit', (e) => handleProfileUpdate(e, currentUser.email));
     }
 
-    // ปุ่ม Logout
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        if(confirm('ออกจากระบบ?')) { localStorage.removeItem('easygrowUser'); window.location.href='index.html'; }
-    });
-
     // ==========================================
-    // 🍔 Mobile Menu Logic (รวมไว้ที่นี่เลย)
+    // 5. Mobile Menu Logic (Sidebar)
     // ==========================================
-    const mobileBtn = document.getElementById('mobileMenuBtn');
-    const mobileOverlay = document.getElementById('mobileOverlay');
-    const sidebar = document.querySelector('.sidebar');
-
-    if (mobileBtn && sidebar && mobileOverlay) {
-        const toggleMenu = () => {
-            sidebar.classList.toggle('active');
-            mobileOverlay.classList.toggle('active');
-        };
-        mobileBtn.addEventListener('click', toggleMenu);
-        mobileOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            mobileOverlay.classList.remove('active');
-        });
-    }
+    setupMobileMenu();
 });
 
 // ==========================================
 // 📥 Functions: Load & Render
 // ==========================================
 
-async function loadProfileData(email) {
+/**
+ * ดึงข้อมูลโปรไฟล์และสถิติจาก Server มาแสดงในหน้า Profile
+ */
+async function loadProfileData(email, defaultLogo) {
     try {
         const res = await fetch(`/api/profile?email=${email}`);
         const data = await res.json();
@@ -60,90 +75,106 @@ async function loadProfileData(email) {
         if (res.ok) {
             const { user, stats } = data;
 
-            // --- Left Card ---
-            document.getElementById('displayHugeName').textContent = user.name;
-            document.getElementById('displayRole').textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งาน';
-            document.getElementById('displayEmailSmall').textContent = user.email;
+            // --- ฝั่งซ้าย (Card โปรไฟล์) ---
+            if (document.getElementById('displayHugeName')) document.getElementById('displayHugeName').textContent = user.name;
+            if (document.getElementById('displayRole')) document.getElementById('displayRole').textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
+            if (document.getElementById('displayEmailSmall')) document.getElementById('displayEmailSmall').textContent = user.email;
             
-            const joinDate = new Date(user.created_at).toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-            document.getElementById('displayJoinDate').textContent = joinDate;
+            const dateObj = new Date(user.created_at);
+            const joinDate = dateObj.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+            if (document.getElementById('displayJoinDate')) document.getElementById('displayJoinDate').textContent = joinDate;
             
-            document.getElementById('displayTotalPlants').textContent = stats.total || 0;
+            if (document.getElementById('displayTotalPlants')) document.getElementById('displayTotalPlants').textContent = stats.total || 0;
 
-            // Image Handling (แสดงรูปในหน้า Profile)
+            // แสดงรูปในหน้า Profile (Fallback เป็นโลโก้เว็บ)
             const imgDisplay = document.getElementById('profileImageDisplay');
-            if (user.image_url) {
-                imgDisplay.src = user.image_url;
-                // อัปเดตรูปใน Sidebar ด้วย (เผื่อรูปเปลี่ยนแต่ยังไม่ได้รีเฟรช)
-                updateSidebarImage(user.image_url);
-            } else {
-                imgDisplay.src = 'https://via.placeholder.com/150?text=User';
+            if (imgDisplay) {
+                imgDisplay.src = user.image_url || defaultLogo;
+                imgDisplay.onerror = () => { imgDisplay.src = defaultLogo; };
             }
 
-            // --- Right Card (View Mode) ---
-            document.getElementById('displayName').textContent = user.name;
-            document.getElementById('displayEmail').textContent = user.email;
+            // --- ฝั่งขวา (View Mode) ---
+            if (document.getElementById('displayName')) document.getElementById('displayName').textContent = user.name;
+            if (document.getElementById('displayEmail')) document.getElementById('displayEmail').textContent = user.email;
 
-            // Stats
-            document.getElementById('statGrowing').textContent = stats.growing || 0;
-            document.getElementById('statTotal').textContent = stats.total || 0;
-            document.getElementById('statReady').textContent = stats.ready || 0;
-            document.getElementById('statHarvested').textContent = stats.harvested || 0;
-            document.getElementById('bannerTotal').textContent = stats.total || 0;
+            // สถิติ 4 ช่อง
+            safeSetText('statGrowing', stats.growing || 0);
+            safeSetText('statTotal', stats.total || 0);
+            safeSetText('statReady', stats.ready || 0);
+            safeSetText('statHarvested', stats.harvested || 0);
+            safeSetText('bannerTotal', stats.total || 0);
 
-            // Setup Edit Form Values
-            document.getElementById('editName').value = user.name;
+            if (document.getElementById('editName')) document.getElementById('editName').value = user.name;
         }
     } catch (err) {
         console.error("Load Profile Error:", err);
     }
 }
 
-// Helper: สลับหน้าแก้ไข/ดูข้อมูล
+/**
+ * ตั้งค่า Header Profile (มุมขวาบน) และระบบ Dropdown
+ */
+function setupHeaderProfile(user, defaultLogo) {
+    const headerName = document.getElementById('headerUserName');
+    const headerAvatar = document.getElementById('userAvatarHeader');
+    const menuName = document.getElementById('menuUserName');
+    const menuRole = document.getElementById('menuUserRole');
+    const profileTrigger = document.getElementById('profileTrigger');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const logoutBtn = document.getElementById('logoutBtnHeader');
+
+    if (user) {
+        if (headerName) headerName.textContent = user.name;
+        if (menuName) menuName.textContent = user.name;
+        if (menuRole) menuUserRole.textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
+
+        if (headerAvatar) {
+            const profileImg = user.image_url || defaultLogo;
+            headerAvatar.innerHTML = `
+                <img src="${profileImg}" 
+                     onerror="this.src='${defaultLogo}'" 
+                     style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        }
+
+        if (profileTrigger && dropdownMenu) {
+            profileTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('active');
+            });
+            window.addEventListener('click', () => dropdownMenu.classList.remove('active'));
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+                    localStorage.removeItem('easygrowUser');
+                    window.location.href = 'login.html';
+                }
+            });
+        }
+
+        if (user.role !== 'admin') {
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+        }
+    }
+}
+
+/**
+ * สลับโหมด แก้ไข / ดูข้อมูล
+ */
 window.toggleEditMode = function(showEdit) {
-    document.getElementById('viewMode').style.display = showEdit ? 'none' : 'block';
-    document.getElementById('editMode').style.display = showEdit ? 'block' : 'none';
-}
-
-// Helper: แสดงผล Sidebar (ชื่อ + รูป)
-function setupSidebar(user) {
-    document.getElementById('sidebarUserName').textContent = user.name || 'ผู้ใช้งาน';
-    document.getElementById('sidebarUserRole').textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
-    
-    // จัดการรูปภาพใน Sidebar
-    updateSidebarImage(user.image_url, user.name);
-
-    // Show/Hide Admin menus
-    if (user.role !== 'admin') {
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-    }
-}
-
-// Helper: อัปเดต HTML ของรูปภาพใน Sidebar
-function updateSidebarImage(imageUrl, name) {
-    // ⭐ แก้ตรงนี้: ให้มันหาทั้ง userAvatar (หน้าทั่วไป) หรือ sidebarAvatar (หน้า Profile)
-    const avatarEl = document.getElementById('userAvatar') || document.getElementById('sidebarAvatar');
-    
-    if (!avatarEl) return;
-
-    if (imageUrl) {
-        // ใส่รูปภาพ
-        avatarEl.innerHTML = `<img src="${imageUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-        avatarEl.style.backgroundColor = 'transparent'; 
-        avatarEl.style.border = '2px solid #fff'; // เพิ่มขอบขาวนิดนึงจะได้สวย
-    } else {
-        // ถ้าไม่มีรูป ให้ใส่ตัวอักษรแรก
-        avatarEl.innerHTML = ''; 
-        avatarEl.textContent = name ? name.charAt(0).toUpperCase() : 'U';
-        avatarEl.style.backgroundColor = '#ddd';
-    }
+    const view = document.getElementById('viewMode');
+    const edit = document.getElementById('editMode');
+    if (view) view.style.display = showEdit ? 'none' : 'block';
+    if (edit) edit.style.display = showEdit ? 'block' : 'none';
 }
 
 // ==========================================
 // 📤 Functions: Update & Upload
 // ==========================================
 
-async function handleImageUpload(e, email) {
+async function handleImageUpload(e, email, defaultLogo) {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -160,16 +191,19 @@ async function handleImageUpload(e, email) {
         
         if (res.ok) {
             alert('อัปโหลดรูปสำเร็จ!');
-            
-            // 1. เปลี่ยนรูปในหน้าจอทันที
-            document.getElementById('profileImageDisplay').src = data.imageUrl;
-            updateSidebarImage(data.imageUrl);
-
-            // ⭐ 2. สำคัญ: อัปเดต LocalStorage เพื่อให้หน้าอื่นเห็นรูปด้วย ⭐
+            const mainImg = document.getElementById('profileImageDisplay');
+            if (mainImg) {
+                mainImg.src = data.imageUrl;
+                mainImg.onerror = () => { mainImg.src = defaultLogo; };
+            }
+            const headerAvatar = document.getElementById('userAvatarHeader');
+            if (headerAvatar) {
+                headerAvatar.innerHTML = `
+                    <img src="${data.imageUrl}" onerror="this.src='${defaultLogo}'" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            }
             const storedUser = JSON.parse(localStorage.getItem('easygrowUser'));
             storedUser.image_url = data.imageUrl;
             localStorage.setItem('easygrowUser', JSON.stringify(storedUser));
-
         } else {
             alert('อัปโหลดล้มเหลว: ' + (data.error || 'Unknown error'));
         }
@@ -181,7 +215,6 @@ async function handleImageUpload(e, email) {
 
 async function handleProfileUpdate(e, email) {
     e.preventDefault();
-    
     const name = document.getElementById('editName').value;
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
@@ -191,9 +224,8 @@ async function handleProfileUpdate(e, email) {
         alert('รหัสผ่านใหม่ไม่ตรงกัน');
         return;
     }
-    
     if (newPassword && !currentPassword) {
-        alert('กรุณาใส่รหัสผ่านปัจจุบันเพื่อยืนยัน');
+        alert('กรุณาใส่รหัสผ่านปัจจุบันเพื่อยืนยันการเปลี่ยน');
         return;
     }
 
@@ -207,12 +239,9 @@ async function handleProfileUpdate(e, email) {
 
         if (res.ok) {
             alert('บันทึกข้อมูลสำเร็จ');
-            
-            // อัปเดตชื่อใน LocalStorage
             const storedUser = JSON.parse(localStorage.getItem('easygrowUser'));
             storedUser.name = name;
             localStorage.setItem('easygrowUser', JSON.stringify(storedUser));
-
             location.reload(); 
         } else {
             alert(result.error || 'บันทึกไม่สำเร็จ');
@@ -220,5 +249,27 @@ async function handleProfileUpdate(e, email) {
     } catch (err) {
         console.error(err);
         alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    }
+}
+
+function safeSetText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
+function setupMobileMenu() {
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const sidebar = document.querySelector('.sidebar');
+    if (mobileBtn && sidebar && mobileOverlay) {
+        const toggleMenu = () => {
+            sidebar.classList.toggle('active');
+            mobileOverlay.classList.toggle('active');
+        };
+        mobileBtn.addEventListener('click', toggleMenu);
+        mobileOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            mobileOverlay.classList.remove('active');
+        });
     }
 }

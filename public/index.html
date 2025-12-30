@@ -3,73 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyGrow - เพื่อนคู่คิดเรื่องทำสวน</title>
+    <title>คลังข้อมูลผัก - EasyGrow</title>
     
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css"> 
+    <link rel="stylesheet" href="css/index.css">
     
     <script src="js/index.js" defer></script>
+    <script src="js/watering.js" defer></script>
 </head>
-<body class="landing-body">
+<body>
+    <button class="hamburger-btn" id="mobileMenuBtn">☰</button>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
 
-    <div class="landing-container">
-        <div class="info-side">
-            <h1>EasyGrow <br>🌱</h1>
-            <p class="tagline">แหล่งเรียนรู้การปลูกผักขั้นพื้นฐาน และผู้ช่วยอัจฉริยะสำหรับคนรักสวน</p>
-
-            <ul class="feature-list">
-                <li>
-                    <span class="feature-icon">📚</span>
-                    <span><strong>คลังข้อมูลผัก:</strong> เรียนรู้วิธีปลูก แสง น้ำ และระยะเวลาเก็บเกี่ยว</span>
-                </li>
-                <li>
-                    <span class="feature-icon">📅</span>
-                    <span><strong>บันทึกการปลูก:</strong> (สมาชิก) ติดตามการเจริญเติบโตของผักคุณ</span>
-                </li>
-                <li>
-                    <span class="feature-icon">💧</span>
-                    <span><strong>แจ้งเตือนรดน้ำ:</strong> (สมาชิก) ไม่ลืมรดน้ำอีกต่อไป</span>
-                </li>
-                <li>
-                    <span class="feature-icon">🎮</span>
-                    <span><strong>มินิเกม:</strong> (สมาชิก) ผ่อนคลายกับการจำลองการปลูก</span>
-                </li>
-            </ul>
-
-            <div class="guest-cta">
-                <p>ยังไม่อยากสมัครสมาชิก? เข้าไปดูข้อมูลก่อนได้เลย!</p>
-                <a href="vegetable-library.html" class="btn-guest">👀 เข้าชมแบบผู้เยี่ยมชม (Guest)</a>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">
+                <img src="/images/logo.png" alt="EasyGrow Logo">
+            </div>
+            <div class="logo-text">
+                <h2>EasyGrow</h2>
             </div>
         </div>
 
-        <div class="login-side">
-            <div class="login-box">
-                <h2>เข้าสู่ระบบ</h2>
-                <div id="errorMessage" class="error-message"></div>
-                
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label>อีเมล</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">✉️</span>
-                            <input type="email" id="email" placeholder="name@example.com" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>รหัสผ่าน</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">🔒</span>
-                            <input type="password" id="password" placeholder="••••••••" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-login">เข้าใช้งานระบบ</button>
-                </form>
+        <ul class="nav-menu">
+            <li><a href="dashboard.html"><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
+            <li><a href="index.html" class="active"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
+            <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
+            <li>
+                <a href="watering.html">
+                    <span class="nav-icon-box">💧</span> 
+                    <span>การรดน้ำ</span>
+                    <span id="waterBadge" class="nav-badge" style="display:none;">0</span>
+                </a>
+            </li>
+            <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
+            <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
+            
+            <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
+            <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
+        </ul>
+    </aside>
 
-                <div class="register-link">
-                    ยังไม่มีบัญชีใช่ไหม? <a href="register.html">สมัครสมาชิกฟรี</a>
+    <header class="top-header">
+        <div class="profile-trigger" id="profileTrigger">
+            <span id="headerUserName">กำลังโหลด...</span>
+            <div class="avatar-header" id="userAvatarHeader">
+                👤
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-header">
+                <h4 id="menuUserName">ชื่อผู้ใช้</h4>
+                <p id="menuUserRole">สถานะ</p>
+            </div>
+            
+            <a href="profile.html" class="dropdown-item">โปรไฟล์ของฉัน</a>
+            
+            <button id="logoutBtnHeader" class="dropdown-item logout">ออกจากระบบ</button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        
+        <section class="promo-section">
+            <div class="promo-content">
+                <h2>ยินดีต้อนรับสู่ EasyGrow 🌱</h2>
+                <p>เพื่อนคู่คิดสำหรับคนรักสวน ให้การปลูกผักเป็นเรื่องง่ายด้วยระบบบันทึกอัจฉริยะและการแจ้งเตือนรดน้ำที่แม่นยำ</p>
+                <div class="promo-tags">
+                    <span class="promo-tag">📚 คลังความรู้</span>
+                    <span class="promo-tag">🔔 แจ้งเตือนรดน้ำ</span>
+                    <span class="promo-tag">📊 ติดตามการเติบโต</span>
                 </div>
             </div>
+        </section>
+
+        <div class="library-header-group">
+            <div class="header-section">
+                <h1>คลังข้อมูลผัก 🥕</h1>
+                <p>สำรวจและเรียนรู้เกี่ยวกับผักชนิดต่างๆ ที่คุณสามารถปลูกได้</p>
+            </div>
+
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="ค้นหาผัก (เช่น มะเขือเทศ, ผักกาด)...">
+            </div>
         </div>
-    </div>
+
+        <div id="vegetableGrid" class="veg-grid">
+            </div>
+
+    </main>
 
 </body>
 </html>

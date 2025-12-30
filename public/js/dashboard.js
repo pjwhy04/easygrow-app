@@ -1,38 +1,112 @@
 /**
- * dashboard.js (ฉบับแก้ไข: 5 สถานะ และคำนวณจำนวนจริง)
+ * dashboard.js
+ * - จัดการหน้าแดชบอร์ด สถิติ และกิจกรรมล่าสุด
+ * - ปรับปรุง Header UI และ Mobile Menu ให้เหมือน index.js
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Auth Guard
+    // ⭐ กำหนดพาธโลโก้เว็บสำหรับใช้เป็นรูปสำรอง ⭐
+    const webLogo = '/images/logo.png'; 
+
+    // ==========================================
+    // 0. แก้ไขสีโลโก้ Sidebar (เพื่อให้เหมือนหน้าอื่น)
+    // ==========================================
+    const sidebarLogoText = document.querySelector('.sidebar .logo-text h2');
+    if (sidebarLogoText) {
+        sidebarLogoText.style.setProperty('color', '#2e7d32', 'important'); 
+        sidebarLogoText.style.fontWeight = '600';
+    }
+
+    // ==========================================
+    // 1. Auth Guard & User Data (ตรวจสอบสิทธิ์)
+    // ==========================================
     const storedUser = localStorage.getItem('easygrowUser');
-    if (!storedUser) { window.location.href = 'index.html'; return; }
-    const user = JSON.parse(storedUser);
-
-    // Sidebar Setup
-    document.getElementById('sidebarUserName').textContent = user.name || 'ผู้ใช้งาน';
-    document.getElementById('sidebarUserRole').textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
-    const avatarEl = document.getElementById('userAvatar');
-    if (user.image_url) {
-        avatarEl.innerHTML = `<img src="${user.image_url}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-        avatarEl.style.backgroundColor = 'transparent';
-    } else {
-        avatarEl.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+    if (!storedUser) { 
+        window.location.href = 'login.html'; 
+        return; 
     }
 
+    let user = null;
+    try {
+        user = JSON.parse(storedUser);
+    } catch (e) {
+        console.error("User data corrupted");
+        localStorage.removeItem('easygrowUser');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // ==========================================
+    // 2. ตั้งค่าโปรไฟล์และ Header UI
+    // ==========================================
+    const headerUserName = document.getElementById('headerUserName');
+    const userAvatarHeader = document.getElementById('userAvatarHeader');
+    const menuUserName = document.getElementById('menuUserName');
+    const menuUserRole = document.getElementById('menuUserRole');
+    const logoutBtnHeader = document.getElementById('logoutBtnHeader');
+    
+    // Dropdown Elements
+    const profileTrigger = document.getElementById('profileTrigger');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    // 2.1 แสดงข้อมูล User
+    if (headerUserName) headerUserName.textContent = user.name || 'ผู้ใช้งาน';
+    if (menuUserName) menuUserName.textContent = user.name || 'ผู้ใช้งาน';
+    if (menuUserRole) menuUserRole.textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
+
+    if (userAvatarHeader) {
+        const profileImg = user.image_url ? user.image_url : webLogo;
+        userAvatarHeader.innerHTML = `
+            <img src="${profileImg}" 
+                 onerror="this.src='${webLogo}'" 
+                 style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        userAvatarHeader.style.backgroundColor = 'transparent';
+    }
+
+    // 2.2 ซ่อนเมนู Admin ถ้าไม่ใช่ Admin
     if (user.role !== 'admin') {
-        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.admin-only').forEach(el => el.style.setProperty('display', 'none', 'important'));
     }
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        if(confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
-            localStorage.removeItem('easygrowUser');
-            window.location.href = 'index.html';
-        }
+    // 2.3 ปุ่มออกจากระบบ
+    if (logoutBtnHeader) {
+        logoutBtnHeader.onclick = (e) => {
+            e.preventDefault();
+            if (confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
+                localStorage.removeItem('easygrowUser');
+                window.location.href = 'login.html'; // Dashboard ต้องเด้งไป Login ไม่ใช่ index
+            }
+        };
+    }
+
+    // 2.4 Profile Dropdown Toggle
+    if (profileTrigger && dropdownMenu) {
+        profileTrigger.onclick = (e) => { 
+            e.stopPropagation(); 
+            dropdownMenu.classList.toggle('active'); 
+        };
+    }
+    
+    // คลิกที่อื่นเพื่อปิดเมนู
+    window.addEventListener('click', () => {
+        if (dropdownMenu) dropdownMenu.classList.remove('active');
     });
 
-    // ============================================
-    // 2. Fetch Data
-    // ============================================
+    // ==========================================
+    // 3. Mobile Menu Logic (เพิ่มส่วนนี้เพื่อให้เมนูมือถือทำงาน)
+    // ==========================================
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const sidebar = document.querySelector('.sidebar');
+    if (mobileBtn && sidebar && mobileOverlay) {
+        const toggleMenu = () => { sidebar.classList.toggle('active'); mobileOverlay.classList.toggle('active'); };
+        mobileBtn.onclick = toggleMenu;
+        mobileOverlay.onclick = toggleMenu;
+    }
+
+    // ==========================================
+    // 4. ดึงข้อมูลและคำนวณสถิติหน้า Dashboard
+    // ==========================================
     let plantingLog = [];
     try {
         const res = await fetch(`/api/planting-log?email=${user.email}`);
@@ -40,113 +114,96 @@ document.addEventListener('DOMContentLoaded', async () => {
             plantingLog = await res.json();
         }
     } catch (error) {
-        console.error("Network error:", error);
+        console.error("Network error fetching logs:", error);
     }
 
-    // ============================================
-    // 3. Calculate Summaries (คำนวณแบบ 5 สถานะ)
-    // ============================================
-    let totalCount = plantingLog.length; // จำนวนทั้งหมดที่มีในระบบ
+    // คำนวณสถิติ
+    let totalCount = plantingLog.length;
     let growingCount = 0;
     let readyCount = 0;
     let harvestedCount = 0;
-    let wateringCount = 0;
-
-    const todayDate = new Date();
-    todayDate.setHours(0, 0, 0, 0);
 
     plantingLog.forEach(item => {
         const statusLower = (item.status || '').toLowerCase();
-        
-        // นับตามสถานะจริง
         if (statusLower === 'growing') growingCount++;
-        if (statusLower === 'ready') readyCount++;
-        if (statusLower === 'harvested') harvestedCount++;
-
-        // นับการรดน้ำ (เฉพาะต้นที่ยังไม่ได้เก็บเกี่ยว)
-        if (statusLower !== 'harvested') {
-            const lastWaterStr = item.last_watered_date || item.planted_date;
-            const lastWaterDate = new Date(lastWaterStr);
-            lastWaterDate.setHours(0, 0, 0, 0);
-
-            const interval = item.watering_interval_days || 1;
-            const nextWaterDate = new Date(lastWaterDate);
-            nextWaterDate.setDate(lastWaterDate.getDate() + interval);
-
-            if (todayDate >= nextWaterDate) {
-                wateringCount++;
-            }
-        }
+        else if (statusLower === 'ready') readyCount++;
+        else if (statusLower === 'harvested') harvestedCount++;
     });
 
-    // อัปเดตตัวเลขบนหน้าจอ (Mapping ID ให้ตรงกับ HTML ใหม่)
+    // อัปเดต UI สถิติ
     safeSetText('countTotal', totalCount);
     safeSetText('countGrowing', growingCount);
     safeSetText('countHarvest', readyCount);
     safeSetText('countHarvested', harvestedCount);
-    safeSetText('countWater', wateringCount);
 
-    // ============================================
-    // 4. Recent Activity List
-    // ============================================
-    const activityList = document.getElementById('recentActivityList');
-    if (activityList) {
-        activityList.innerHTML = ''; 
-        if (plantingLog.length === 0) {
-            activityList.innerHTML = '<li style="padding:20px; text-align:center; color:#888;">ยังไม่มีประวัติการปลูก</li>';
-        } else {
-            const sortedLog = [...plantingLog].sort((a, b) => new Date(b.planted_date) - new Date(a.planted_date));
-            const recentItems = sortedLog.slice(0, 5);
-
-            recentItems.forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'activity-item';
-                let statusClass = 'status-planted';
-                let statusText = 'เพิ่งปลูก';
-
-                const sLow = (item.status || '').toLowerCase();
-                if (sLow === 'growing') { statusClass = 'status-growing'; statusText = 'กำลังโต'; }
-                else if (sLow === 'ready') { statusClass = 'status-ready'; statusText = 'พร้อมเก็บ'; }
-                else if (sLow === 'harvested') { statusClass = 'status-harvested'; statusText = 'เก็บแล้ว'; }
-
-                const dateObj = new Date(item.planted_date);
-                const dateDisplay = isNaN(dateObj) ? '-' : dateObj.toLocaleDateString('th-TH', {
-                    year: 'numeric', month: 'short', day: 'numeric'
-                });
-
-                li.innerHTML = `
-                    <div class="plant-icon-box">🌱</div>
-                    <div class="activity-details">
-                        <span class="activity-name">${item.vegetable_name || 'ไม่ระบุชื่อพืช'}</span>
-                        <span class="activity-meta">${item.location || '-'} • เริ่มปลูก ${dateDisplay}</span>
-                    </div>
-                    <span class="status-badge ${statusClass}">${statusText}</span>
-                `;
-                activityList.appendChild(li);
-            });
+    // ==========================================
+    // 5. เรียกใช้ Master Logic จาก watering.js
+    // ==========================================
+    if (window.syncWateringStatus) {
+        try {
+            // false = ขอแค่ตัวเลข ไม่ต้องเด้ง Popup แจ้งเตือนหน้า Dashboard (รก)
+            const wateringCount = await window.syncWateringStatus(user.email, false);
+            safeSetText('countWater', wateringCount);
+        } catch (err) {
+            console.warn("Watering sync failed:", err);
+            safeSetText('countWater', 0);
         }
     }
+
+    // ============================================
+    // 6. แสดงรายการกิจกรรมล่าสุด (Activity List)
+    // ============================================
+    renderRecentActivity(plantingLog);
 });
+
+// --- Helper Functions ---
+
+function renderRecentActivity(logs) {
+    const activityList = document.getElementById('recentActivityList');
+    if (!activityList) return;
+
+    activityList.innerHTML = ''; 
+    if (!logs || logs.length === 0) {
+        activityList.innerHTML = '<li style="padding:20px; text-align:center; color:#888;">ยังไม่มีประวัติการปลูก</li>';
+        return;
+    }
+
+    // เรียงจากใหม่ไปเก่า และตัดมาแค่ 5 อัน
+    const recentItems = [...logs]
+        .sort((a, b) => new Date(b.planted_date) - new Date(a.planted_date))
+        .slice(0, 5); 
+
+    recentItems.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'activity-item';
+        
+        let statusClass = 'status-planted';
+        let statusText = 'เพิ่งปลูก';
+        const sLow = (item.status || '').toLowerCase();
+        
+        if (sLow === 'growing') { statusClass = 'status-growing'; statusText = 'กำลังโต'; }
+        else if (sLow === 'ready') { statusClass = 'status-ready'; statusText = 'พร้อมเก็บ'; }
+        else if (sLow === 'harvested') { statusClass = 'status-harvested'; statusText = 'เก็บแล้ว'; }
+
+        // แปลงวันที่ให้สวยงาม
+        const dateObj = new Date(item.planted_date);
+        const dateDisplay = isNaN(dateObj.getTime()) ? '-' : dateObj.toLocaleDateString('th-TH', { 
+            year: 'numeric', month: 'short', day: 'numeric' 
+        });
+
+        li.innerHTML = `
+            <div class="plant-icon-box">🌱</div>
+            <div class="activity-details">
+                <span class="activity-name">${item.vegetable_name || 'ไม่ระบุชื่อพืช'}</span>
+                <span class="activity-meta">${item.location || 'แปลงปลูก'} • เริ่มปลูก ${dateDisplay}</span>
+            </div>
+            <span class="status-badge ${statusClass}">${statusText}</span>
+        `;
+        activityList.appendChild(li);
+    });
+}
 
 function safeSetText(id, text) {
     const el = document.getElementById(id);
     if (el) el.textContent = text;
 }
-
-// Mobile Menu Logic (เหมือนเดิม)
-document.addEventListener('DOMContentLoaded', () => {
-    const mobileBtn = document.getElementById('mobileMenuBtn');
-    const mobileOverlay = document.getElementById('mobileOverlay');
-    const sidebar = document.querySelector('.sidebar');
-    if (mobileBtn && sidebar && mobileOverlay) {
-        const toggleMenu = () => {
-            sidebar.classList.toggle('active');
-            mobileOverlay.classList.toggle('active');
-        };
-        mobileBtn.addEventListener('click', toggleMenu);
-        mobileOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            mobileOverlay.classList.remove('active');
-        });
-    }
-});  

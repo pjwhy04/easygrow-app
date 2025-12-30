@@ -6,12 +6,15 @@
     <title>จัดการข้อมูลผัก - EasyGrow</title>
     
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/manage-vegetables.css">
     
     <script src="js/manage-vegetables.js" defer></script>
+    <script src="js/watering.js" defer></script>
 </head>
 <body>
     <button class="hamburger-btn" id="mobileMenuBtn">☰</button>
     <div class="mobile-overlay" id="mobileOverlay"></div>
+
     <aside class="sidebar">
         <div class="sidebar-logo">
             <div class="logo-icon">
@@ -19,88 +22,96 @@
             </div>
             <div class="logo-text">
                 <h2>EasyGrow</h2>
-                <p></p>
             </div>
         </div>
-            <ul class="nav-menu">
-                <li><a href="dashboard.html" ><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
-                <li><a href="vegetable-library.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
-                <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
-                <li><a href="watering.html"><span class="nav-icon-box">💧</span> <span>การรดน้ำ</span></a></li>
-                <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
-                <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
-                <li class="admin-only"><a href="manage-vegetables.html" class="active"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
-                <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
-            </ul>
-        <div class="sidebar-footer">
+        <ul class="nav-menu">
+            <li><a href="dashboard.html"><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
+            <li><a href="index.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
+            <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
+            <li>
+                <a href="watering.html">
+                    <span class="nav-icon-box">💧</span> 
+                    <span>การรดน้ำ</span>
+                    <span id="waterBadge" class="nav-badge" style="display:none;">0</span>
+                </a>
+            </li>
+            <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
+            <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
             
-            <div class="user-profile">
-                <div class="avatar" id="userAvatar">👤</div>
-                <div class="user-info">
-                    <h4 id="sidebarUserName">กำลังโหลด...</h4>
-                    <span id="sidebarUserRole">...</span>
-                </div>
-            </div>
-
-            <button id="logoutBtn" class="btn-logout-full">
-                <svg class="logout-icon-svg" viewBox="0 0 24 24">
-                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-                </svg>
-                <span>ออกจากระบบ</span>
-            </button>
-
-        </div>
+            <li class="admin-only"><a href="manage-vegetables.html" class="active"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
+            <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
+        </ul>
     </aside>
 
-    <main class="main-content">
-        <div class="header-section">
-            <h1>จัดการข้อมูลผัก 🛠️</h1>
-            <p>เพิ่มข้อมูลผักตามบริบทประเทศไทย</p>
+    <header class="top-header">
+        <div class="profile-trigger" id="profileTrigger">
+            <span id="headerUserName" style="font-weight: 500; color: #333;">กำลังโหลด...</span>
+            <div class="avatar-header" id="userAvatarHeader">👤</div>
         </div>
 
-        <div style="box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 15px;">
-            <div class="action-bar">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="searchVeg" placeholder="ค้นหาผัก...">
-                </div>
-                <button class="btn-add" id="btnAddVeg"><span>+</span> เพิ่มข้อมูลผัก</button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div style="padding: 15px 20px; border-bottom: 1px solid #f5f5f5;">
+                <strong id="menuUserName" style="display:block; font-size:0.9rem; color: #333;">ชื่อผู้ใช้</strong>
+                <small id="menuUserRole" style="color:#888;">สถานะ</small>
             </div>
+            <a href="profile.html" class="dropdown-item">โปรไฟล์ของฉัน</a>
+            <button id="logoutBtnHeader" class="dropdown-item logout">ออกจากระบบ</button>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <div class="header-section" style="margin-bottom: 30px;">
+            <h1 style="color: #1a4d2e; margin-bottom: 10px;">จัดการข้อมูลผัก 🛠️</h1>
+            <p style="color: #666;">เพิ่ม แก้ไข หรือลบข้อมูลพืชในระบบเพื่อแสดงผลในคลังความรู้</p>
+        </div>
 
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ชื่อผัก</th>
-                            <th>เก็บเกี่ยว (วัน)</th>
-                            <th>การรดน้ำ</th>
-                            <th>ช่วงเดือนที่ปลูก</th>
-                            <th>พื้นที่</th>
-                            <th>จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="vegTableBody"></tbody>
-                </table>
+        <div class="action-bar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchVeg" placeholder="ค้นหาชื่อผักที่ต้องการจัดการ...">
             </div>
+            <button class="btn-add" id="btnAddVeg">
+                <span>+</span> เพิ่มข้อมูลผักใหม่
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 250px;">ผัก</th>
+                        <th>ระยะเก็บเกี่ยว</th>
+                        <th>การรดน้ำ</th>
+                        <th>ช่วงเดือนที่เหมาะสม</th>
+                        <th>พื้นที่ปลูก</th>
+                        <th style="width: 120px; text-align: center;">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="vegTableBody">
+                    <tr><td colspan="6" style="text-align:center; padding:40px; color:#999;">กำลังเตรียมข้อมูล...</td></tr>
+                </tbody>
+            </table>
         </div>
     </main>
 
     <div class="modal-overlay" id="vegModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">เพิ่มข้อมูลผักใหม่</h2>
+                <h2 id="modalTitle">ข้อมูลผัก</h2>
                 <span class="close-modal" id="closeModal">&times;</span>
             </div>
+            
             <form id="vegForm">
                 <input type="hidden" id="vegId"> 
+                
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="vegName">ชื่อผัก</label>
-                        <input type="text" id="vegName" class="form-control" required placeholder="เช่น ผักบุ้งจีน">
+                        <input type="text" id="vegName" class="form-control" required placeholder="เช่น ผักกาดหอม">
                     </div>
                     <div class="form-group">
-                        <label for="vegHarvest">เก็บเกี่ยว (จำนวนวันโดยประมาณ)</label>
-                        <input type="text" id="vegHarvest" class="form-control" required placeholder="เช่น 20-25">
+                        <label for="vegHarvest">ระยะเวลาเก็บเกี่ยว (วัน)</label>
+                        <input type="text" id="vegHarvest" class="form-control" required placeholder="เช่น 30-45">
                     </div>
                     
                     <div class="form-group">
@@ -114,50 +125,50 @@
 
                     <div class="form-group">
                         <label for="vegSun">ปริมาณแสงแดด</label>
-                        <input type="text" id="vegSun" class="form-control" placeholder="เช่น แดดจัดตลอดวัน, รำไร">
+                        <input type="text" id="vegSun" class="form-control" placeholder="เช่น แดดจัดตลอดวัน">
                     </div>
 
                     <div class="form-group">
                         <label for="vegMonths">ช่วงเดือนที่เหมาะสม</label>
-                        <input type="text" id="vegMonths" class="form-control" placeholder="เช่น พ.ย. - ม.ค. หรือ ตลอดปี">
+                        <input type="text" id="vegMonths" class="form-control" placeholder="เช่น ตลอดทั้งปี หรือ พ.ย. - ก.พ.">
                     </div>
 
                     <div class="form-group">
-                        <label>พื้นที่ที่ปลูกได้ดี</label>
+                        <label>ภูมิภาคที่ปลูกได้ดี</label>
                         <div class="checkbox-group">
-                            <label class="checkbox-item"><input type="checkbox" name="region" value="ภาคเหนือ"> ภาคเหนือ</label>
-                            <label class="checkbox-item"><input type="checkbox" name="region" value="ภาคกลาง"> ภาคกลาง</label>
-                            <label class="checkbox-item"><input type="checkbox" name="region" value="ภาคอีสาน"> ภาคอีสาน</label>
-                            <label class="checkbox-item"><input type="checkbox" name="region" value="ภาคใต้"> ภาคใต้</label>
+                            <label class="checkbox-item"><input type="checkbox" name="region" value="ภาคเหนือ"> เหนือ</label>
+                            <label class="checkbox-item"><input type="checkbox" name="region" value="ภาคกลาง"> กลาง</label>
+                            <label class="checkbox-item"><input type="checkbox" name="region" value="ภาคอีสาน"> อีสาน</label>
+                            <label class="checkbox-item"><input type="checkbox" name="region" value="ภาคใต้"> ใต้</label>
                             <label class="checkbox-item"><input type="checkbox" name="region" value="ทุกภาค"> ทุกภาค</label>
                         </div>
                     </div>
 
                     <div class="form-group full-width">
-                        <label for="vegImageFile">อัปโหลดรูปภาพผัก</label>
+                        <label>รูปภาพผัก (ถ้ามี)</label>
                         <input type="file" id="vegImageFile" class="form-control" accept="image/*">
-                        <small style="color:gray;">รองรับไฟล์: .jpg, .png, .jpeg</small>
+                        <small style="color: #888;">รองรับไฟล์: .jpg, .png, .jpeg</small>
                     </div>
                     
                     <div class="form-group full-width">
-                        <label for="vegDesc">คำอธิบายทั่วไป</label>
-                        <textarea id="vegDesc" class="form-control" rows="2" placeholder="ข้อมูลทั่วไปของผัก..."></textarea>
+                        <label for="vegDesc">คำอธิบาย/สรรพคุณ</label>
+                        <textarea id="vegDesc" class="form-control" rows="2" placeholder="ใส่ข้อมูลสั้นๆ เกี่ยวกับผัก..."></textarea>
                     </div>
 
                     <div class="form-group full-width">
-                        <label for="vegSteps">ขั้นตอนการปลูก (คั่นด้วยจุลภาค ,)</label>
-                        <textarea id="vegSteps" class="form-control" rows="3" placeholder="1. เตรียมดิน, 2. หว่านเมล็ด, 3. รดน้ำ..."></textarea>
+                        <label for="vegSteps">ขั้นตอนการปลูก (คั่นด้วยจุลภาค , )</label>
+                        <textarea id="vegSteps" class="form-control" rows="2" placeholder="เช่น เตรียมดิน, หว่านเมล็ด, รดน้ำเช้าเย็น..."></textarea>
                     </div>
 
                     <div class="form-group full-width">
-                        <label for="vegMoreTips">เคล็ดลับเพิ่มเติม (คั่นด้วยจุลภาค ,)</label>
-                        <textarea id="vegMoreTips" class="form-control" rows="2" placeholder="เช่น ควรพรวนดินทุกสัปดาห์, ระวังแมลง..."></textarea>
+                        <label for="vegMoreTips">เคล็ดลับเพิ่มเติม (คั่นด้วยจุลภาค , )</label>
+                        <textarea id="vegMoreTips" class="form-control" rows="2" placeholder="เช่น ควรคลุมด้วยฟาง, ระวังเพลี้ยไฟ..."></textarea>
                     </div>
                 </div>
 
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" id="btnCancel">ยกเลิก</button>
-                    <button type="submit" class="btn-submit">บันทึกข้อมูล</button>
+                    <button type="submit" class="btn-submit">บันทึกข้อมูลผัก</button>
                 </div>
             </form>
         </div>

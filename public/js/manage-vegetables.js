@@ -1,45 +1,48 @@
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * manage-vegetables.js
+ * - จัดการข้อมูลผัก (CRUD) สำหรับผู้ดูแลระบบ
+ * - ⭐ ปรับปรุง: เรียกใช้ Master Logic จาก watering.js สำหรับระบบแจ้งเตือนรดน้ำ ⭐
+ * - ย้ายส่วนโปรไฟล์ไปที่ Top Header Dropdown พร้อมรูปสำรอง (Logo)
+ */
 
-    // 1. Auth Guard
+document.addEventListener('DOMContentLoaded', async () => {
+    // ⭐ กำหนดพาธโลโก้เว็บสำหรับใช้เป็นรูปสำรอง ⭐
+    const webLogo = '/images/logo.png';
+
+    // ==========================================
+    // 1. Auth Guard & Admin Check
+    // ==========================================
     const storedUser = localStorage.getItem('easygrowUser');
-    if (!storedUser) { window.location.href = 'index.html'; return; }
-    
+    if (!storedUser) { 
+        window.location.href = 'login.html'; 
+        return; 
+    }
     const user = JSON.parse(storedUser);
     
-    // ตรวจสอบว่าเป็น Admin หรือไม่
     if (user.role !== 'admin') { 
-        alert('Access Denied'); 
+        alert('เข้าถึงถูกปฏิเสธ: สำหรับผู้ดูแลระบบเท่านั้น'); 
         window.location.href = 'dashboard.html'; 
         return; 
     }
 
     // ==========================================
-    // Sidebar Info (แก้ไขให้โชว์รูปโปรไฟล์)
+    // 2. Top Header & Dropdown Setup (ส่วนโปรไฟล์)
     // ==========================================
-    document.getElementById('sidebarUserName').textContent = user.name;
-    document.getElementById('sidebarUserRole').textContent = 'ผู้ดูแลระบบ';
+    setupHeaderUI(user, webLogo);
 
-    // ⭐ ส่วนที่แก้ไข: แสดงรูปโปรไฟล์ถ้ามี ⭐
-    const avatarEl = document.getElementById('userAvatar');
-    if (user.image_url) {
-        avatarEl.innerHTML = `<img src="${user.image_url}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-        avatarEl.style.backgroundColor = 'transparent'; // ลบสีพื้นหลังเดิมออก
-    } else {
-        avatarEl.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+    // ==========================================
+    // ⭐ 3. CENTRALIZED WATERING CHECK (Master Logic) ⭐
+    // ==========================================
+    // เรียกใช้ฟังก์ชันจาก watering.js เพื่ออัปเดต Badge และเช็ค Pop-up เพียงจุดเดียว
+    // 🔴 แก้ไข: เปลี่ยน true เป็น false เพื่อหยุดการบังคับ Pop-up เด้งทุกครั้ง
+    if (window.syncWateringStatus) {
+        await window.syncWateringStatus(user.email, false);
     }
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        if(confirm('ออกจากระบบ?')) { 
-            localStorage.removeItem('easygrowUser'); 
-            window.location.href = 'index.html'; 
-        }
-    });
-
     // ==========================================
-    // 2. ตัวแปร Global เก็บข้อมูลผัก
+    // 4. จัดการข้อมูลผัก (Vegetable Management)
     // ==========================================
-    let allVegetables = []; // เก็บไว้ใช้ตอนกด Edit จะได้ไม่ต้อง Fetch ใหม่
-
+    let allVegetables = []; 
     const tableBody = document.getElementById('vegTableBody');
     const searchInput = document.getElementById('searchVeg');
 
@@ -47,36 +50,35 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('/api/vegetables');
             if (!response.ok) throw new Error('Network Error');
-            
-            allVegetables = await response.json(); // เก็บลงตัวแปร Global
+            allVegetables = await response.json();
             renderTable(allVegetables, filterText);
-
         } catch (error) {
-            console.error('Error:', error);
-            tableBody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">โหลดข้อมูลไม่สำเร็จ</td></tr>`;
+            console.error('Error loading vegetables:', error);
+            if (tableBody) tableBody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center; padding:20px;">ไม่สามารถโหลดข้อมูลได้</td></tr>`;
         }
     }
 
     function renderTable(data, filterText) {
+        if (!tableBody) return;
         tableBody.innerHTML = '';
         const filtered = data.filter(v => v.name.toLowerCase().includes(filterText.toLowerCase()));
 
         if (filtered.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">ไม่พบข้อมูล</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">ไม่พบข้อมูลผัก</td></tr>';
             return;
         }
 
         filtered.forEach(veg => {
             const tr = document.createElement('tr');
-            
             const waterDisplay = Array.isArray(veg.water) ? veg.water.join(', ') : veg.water;
             const regionDisplay = Array.isArray(veg.regions) ? veg.regions.join(', ') : veg.regions;
-            // รูปในตาราง
-            const imgTag = veg.image ? `<img src="${veg.image}" style="width:40px; height:40px; object-fit:cover; border-radius:50%; vertical-align:middle; margin-right:10px;">` : '';
+            
+            const vegImgPath = veg.image ? veg.image : webLogo;
+            const imgTag = `<img src="${vegImgPath}" onerror="this.src='${webLogo}'" class="table-img" style="width:40px; height:40px; object-fit:cover; border-radius:50%; vertical-align:middle; margin-right:12px; border: 1px solid #eee;">`;
 
             tr.innerHTML = `
                 <td style="font-weight: 500;">${imgTag}${veg.name}</td>
-                <td>${veg.harvest_time}</td> 
+                <td>${veg.harvest_time} วัน</td> 
                 <td>${waterDisplay}</td>
                 <td>${veg.months}</td>
                 <td>${regionDisplay}</td>
@@ -90,154 +92,155 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchAndRender();
-    searchInput.addEventListener('input', (e) => renderTable(allVegetables, e.target.value));
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => renderTable(allVegetables, e.target.value));
+    }
 
     // ==========================================
-    // 3. จัดการ Modal (เพิ่ม & แก้ไข)
+    // 5. Modal & Form Handling
     // ==========================================
     const modal = document.getElementById('vegModal');
     const form = document.getElementById('vegForm');
     const modalTitle = document.getElementById('modalTitle');
     
-    // เปิด Modal เพิ่มใหม่
-    document.getElementById('btnAddVeg').addEventListener('click', () => {
-        form.reset();
-        document.getElementById('vegId').value = ''; // เคลียร์ ID
-        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-        modalTitle.textContent = 'เพิ่มข้อมูลผักใหม่';
-        modal.style.display = 'flex';
-    });
+    const btnAddVeg = document.getElementById('btnAddVeg');
+    if (btnAddVeg) {
+        btnAddVeg.addEventListener('click', () => {
+            if(form) form.reset();
+            document.getElementById('vegId').value = ''; 
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            modalTitle.textContent = 'เพิ่มข้อมูลผักใหม่';
+            modal.style.display = 'flex';
+        });
+    }
 
-    // ปิด Modal
-    const closeModal = () => modal.style.display = 'none';
-    document.getElementById('closeModal').onclick = closeModal;
-    document.getElementById('btnCancel').onclick = closeModal;
+    const closeModal = () => { if(modal) modal.style.display = 'none'; };
+    if (document.getElementById('closeModal')) document.getElementById('closeModal').onclick = closeModal;
+    if (document.getElementById('btnCancel')) document.getElementById('btnCancel').onclick = closeModal;
 
-    // ฟังก์ชัน Edit (ดึงข้อมูลมาใส่ฟอร์ม)
     window.editVeg = function(id) {
         const veg = allVegetables.find(v => v.id === id);
         if (!veg) return;
-
-        // 1. ใส่ข้อมูล Text
         document.getElementById('vegId').value = veg.id;
         document.getElementById('vegName').value = veg.name;
         document.getElementById('vegHarvest').value = veg.harvest_time;
         document.getElementById('vegSun').value = veg.sunlight;
         document.getElementById('vegMonths').value = veg.months;
         document.getElementById('vegDesc').value = veg.description || '';
-        document.getElementById('vegSteps').value = Array.isArray(veg.steps) ? veg.steps.join(', ') : veg.steps;
-        document.getElementById('vegMoreTips').value = Array.isArray(veg.moreTips) ? veg.moreTips.join(', ') : veg.moreTips;
+        
+        // แปลง Array กลับเป็น Comma String สำหรับแสดงใน Textarea
+        document.getElementById('vegSteps').value = Array.isArray(veg.steps) ? veg.steps.join(', ') : (veg.steps || '');
+        document.getElementById('vegMoreTips').value = Array.isArray(veg.moreTips) ? veg.moreTips.join(', ') : (veg.moreTips || '');
 
-        // 2. ติ๊ก Checkbox (Water & Regions)
         const checkBoxes = (name, values) => {
             document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
-                cb.checked = values.includes(cb.value);
+                cb.checked = (values || []).includes(cb.value);
             });
         };
         checkBoxes('waterTime', Array.isArray(veg.water) ? veg.water : []);
         checkBoxes('region', Array.isArray(veg.regions) ? veg.regions : []);
-
-        // 3. ปรับ UI
+        
         modalTitle.textContent = 'แก้ไขข้อมูลผัก';
         modal.style.display = 'flex';
     };
 
-    // Submit Form
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const id = document.getElementById('vegId').value;
-        const formData = new FormData();
-
-        // Helper เก็บค่า Checkbox
-        const getChecked = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
-
-        formData.append('name', document.getElementById('vegName').value);
-        formData.append('harvestTime', document.getElementById('vegHarvest').value);
-        formData.append('sunlight', document.getElementById('vegSun').value);
-        formData.append('months', document.getElementById('vegMonths').value);
-        formData.append('description', document.getElementById('vegDesc').value);
-        
-        formData.append('water', JSON.stringify(getChecked('waterTime')));
-        formData.append('regions', JSON.stringify(getChecked('region')));
-        
-        const stepsArr = document.getElementById('vegSteps').value.split(',').map(s=>s.trim()).filter(s=>s!=='');
-        formData.append('steps', JSON.stringify(stepsArr));
-
-        const tipsArr = document.getElementById('vegMoreTips').value.split(',').map(s=>s.trim()).filter(s=>s!=='');
-        formData.append('moreTips', JSON.stringify(tipsArr));
-
-        const fileInput = document.getElementById('vegImageFile');
-        if (fileInput && fileInput.files[0]) {
-            formData.append('imageFile', fileInput.files[0]);
-        }
-
-        try {
-            const btn = form.querySelector('.btn-submit');
-            const originalText = btn.textContent;
-            btn.textContent = 'กำลังบันทึก...';
-            btn.disabled = true;
-
-            // เช็คว่า เพิ่ม (POST) หรือ แก้ไข (PUT)
-            const url = id ? `/api/vegetables/${id}` : '/api/vegetables';
-            const method = id ? 'PUT' : 'POST';
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('vegId').value;
+            const formData = new FormData();
             
-            const res = await fetch(url, {
-                method: method,
-                body: formData 
-            });
+            const getChecked = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value);
 
-            if (res.ok) {
-                alert(id ? 'แก้ไขข้อมูลเรียบร้อย!' : 'เพิ่มข้อมูลเรียบร้อย!');
-                modal.style.display = 'none';
-                fetchAndRender(); 
-            } else {
-                const errData = await res.json();
-                alert('เกิดข้อผิดพลาด: ' + (errData.error || 'Unknown Error'));
-            }
+            formData.append('name', document.getElementById('vegName').value);
+            formData.append('harvestTime', document.getElementById('vegHarvest').value);
+            formData.append('sunlight', document.getElementById('vegSun').value);
+            formData.append('months', document.getElementById('vegMonths').value);
+            formData.append('description', document.getElementById('vegDesc').value);
             
-            btn.textContent = originalText;
-            btn.disabled = false;
+            // ⭐ ป้องกันดาต้าเบสพัง: แปลงข้อมูลเป็น JSON Array ให้ถูกต้อง
+            formData.append('water', JSON.stringify(getChecked('waterTime')));
+            formData.append('regions', JSON.stringify(getChecked('region')));
+            
+            const toArray = (str) => str.split(',').map(s => s.trim()).filter(s => s !== '');
+            formData.append('steps', JSON.stringify(toArray(document.getElementById('vegSteps').value)));
+            formData.append('moreTips', JSON.stringify(toArray(document.getElementById('vegMoreTips').value)));
 
-        } catch (error) {
-            console.error(error);
-            alert('ติดต่อเซิร์ฟเวอร์ไม่ได้');
-        }
-    });
+            const fileInput = document.getElementById('vegImageFile');
+            if (fileInput && fileInput.files[0]) formData.append('imageFile', fileInput.files[0]);
 
-    // Delete Logic
+            try {
+                const btn = form.querySelector('.btn-submit');
+                const originalText = btn.textContent;
+                btn.textContent = 'กำลังบันทึก...'; btn.disabled = true;
+
+                const url = id ? `/api/vegetables/${id}` : '/api/vegetables';
+                const method = id ? 'PUT' : 'POST';
+                const res = await fetch(url, { method: method, body: formData });
+
+                if (res.ok) {
+                    alert(id ? 'แก้ไขข้อมูลเรียบร้อย!' : 'เพิ่มข้อมูลเรียบร้อย!');
+                    closeModal(); fetchAndRender(); 
+                } else {
+                    const err = await res.json(); alert('ข้อผิดพลาด: ' + (err.error || 'Unknown'));
+                }
+                btn.textContent = originalText; btn.disabled = false;
+            } catch (error) { alert('ติดต่อเซิร์ฟเวอร์ไม่ได้'); }
+        });
+    }
+
     window.deleteVeg = async function(id) {
-        if(confirm('ยืนยันการลบข้อมูลนี้?')) {
+        if (confirm('ยืนยันการลบ? ข้อมูลจะไม่สามารถกู้คืนได้')) {
             try {
                 const res = await fetch(`/api/vegetables/${id}`, { method: 'DELETE' });
-                if (res.ok) { alert('ลบข้อมูลเรียบร้อย'); fetchAndRender(); }
+                if (res.ok) { alert('ลบเรียบร้อย'); fetchAndRender(); }
             } catch (error) { alert('ติดต่อเซิร์ฟเวอร์ไม่ได้'); }
         }
     };
-});
 
-// ==========================================
-// 🍔 Mobile Menu Logic
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+    // ==========================================
+    // 6. Mobile Menu & Header UI Helpers
+    // ==========================================
+    function setupHeaderUI(user, webLogo) {
+        const trigger = document.getElementById('profileTrigger');
+        const menu = document.getElementById('dropdownMenu');
+        const headerName = document.getElementById('headerUserName');
+        const avatarHeader = document.getElementById('userAvatarHeader');
+        const menuName = document.getElementById('menuUserName');
+        const menuRole = document.getElementById('menuUserRole');
+        const logoutBtn = document.getElementById('logoutBtnHeader');
+
+        if (headerName) headerName.textContent = user.name || 'ผู้ดูแลระบบ';
+        if (menuName) menuName.textContent = user.name || 'Admin';
+        if (menuRole) menuRole.textContent = 'ผู้ดูแลระบบ';
+
+        if (avatarHeader) {
+            const profileImg = user.image_url ? user.image_url : webLogo;
+            avatarHeader.innerHTML = `<img src="${profileImg}" onerror="this.src='${webLogo}'" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        }
+
+        if (trigger && menu) {
+            trigger.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('active'); };
+            window.onclick = () => menu.classList.remove('active');
+        }
+
+        if (logoutBtn) {
+            logoutBtn.onclick = (e) => {
+                e.preventDefault();
+                if (confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
+                    localStorage.removeItem('easygrowUser');
+                    window.location.href = 'login.html';
+                }
+            };
+        }
+    }
+
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const mobileOverlay = document.getElementById('mobileOverlay');
     const sidebar = document.querySelector('.sidebar');
-
     if (mobileBtn && sidebar && mobileOverlay) {
-        // ฟังก์ชันเปิด/ปิด เมนู
-        const toggleMenu = () => {
-            sidebar.classList.toggle('active');
-            mobileOverlay.classList.toggle('active');
-        };
-
-        // กดปุ่มขีดสามขีด
-        mobileBtn.addEventListener('click', toggleMenu);
-
-        // กดที่ว่างๆ (Overlay) เพื่อปิดเมนู
-        mobileOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            mobileOverlay.classList.remove('active');
-        });
+        const toggleMenu = () => { sidebar.classList.toggle('active'); mobileOverlay.classList.toggle('active'); };
+        mobileBtn.onclick = toggleMenu;
+        mobileOverlay.onclick = toggleMenu;
     }
 });

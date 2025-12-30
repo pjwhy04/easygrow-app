@@ -1,0 +1,342 @@
+/* =========================================
+   1. GLOBAL VARIABLES & LAYOUT
+   ========================================= */
+:root {
+    --admin-main: #1a4d2e;
+    --admin-accent: #4CAF50;
+    --danger: #d32f2f;
+    --table-header: #f8f9fa;
+    --border-soft: #eeeeee;
+    --white: #ffffff;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+    --radius: 12px;
+    --top-header-height: 70px;
+}
+
+/* ปรับปรุงพื้นที่เนื้อหาหลัก ไม่ให้โดน Sidebar เบียดหรือทับ */
+.main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--top-header-height);
+    padding: 30px;
+    /* ⭐ บังคับความกว้างให้พอดีพื้นที่ที่เหลือ ไม่ให้มุดเข้าใต้เมนู */
+    width: calc(100% - var(--sidebar-width)); 
+    box-sizing: border-box;
+    background-color: #fafafa;
+    min-height: 100vh;
+    transition: 0.3s ease;
+}
+
+/* แก้สีตัวหนังสือชื่อเว็บใน Sidebar ให้เป็นสีเขียวแบรนด์ */
+.sidebar .logo-text h2 {
+    color: var(--admin-main) !important;
+}
+
+/* =========================================
+   2. ACTION BAR (Search & Add Button)
+   ========================================= */
+.action-bar {
+    background: var(--white);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: 1px solid var(--border-soft);
+    flex-wrap: wrap;
+    gap: 15px;
+    box-shadow: var(--shadow-sm);
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: 0.3s;
+}
+
+.search-box input:focus {
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.btn-add {
+    background: var(--admin-accent);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.2s;
+}
+
+.btn-add:hover {
+    background: #43a047;
+    transform: translateY(-2px);
+}
+
+/* =========================================
+   3. VEGETABLE TABLE (อ้างอิงภาพ image_68737f.png)
+   ========================================= */
+.table-container {
+    background: var(--white);
+    overflow-x: auto;
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow-md);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+th {
+    background: var(--table-header);
+    text-align: left;
+    padding: 18px 20px;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid var(--border-soft);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-soft);
+    vertical-align: middle;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+tr:hover {
+    background-color: #f9fbf9;
+}
+
+/* ตกแต่งรูปผักในตาราง */
+.table-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 12px;
+    vertical-align: middle;
+    border: 1px solid #eee;
+    background-color: #f5f5f5;
+}
+
+.action-btn {
+    background: #f5f5f5;
+    border: 1px solid #eee;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 1.1rem;
+}
+
+.action-btn:hover {
+    background: #e0e0e0;
+}
+
+.btn-delete:hover {
+    background: #ffebee;
+    color: var(--danger);
+    border-color: #ffcdd2;
+}
+
+/* =========================================
+   4. MODAL & FORM GRID (อ้างอิงภาพ image_6876e5.png)
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none; /* คุมด้วย JS */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--white);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: var(--radius);
+    padding: 35px;
+    overflow-y: auto;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 15px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--admin-main);
+    font-size: 1.5rem;
+}
+
+.close-modal {
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #999;
+}
+
+/* การจัดวางฟอร์มแบบ 2 คอลัมน์ */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.form-control:focus {
+    border-color: var(--admin-accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ส่วนของ Checkbox */
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 10px;
+    background: #fcfcfc;
+    border-radius: 8px;
+    border: 1px dashed #ddd;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* =========================================
+   5. DROPDOWN PROFILE (Smoothing)
+   ========================================= */
+.dropdown-menu {
+    list-style: none !important; /* ลบจุด */
+    padding: 10px 0 !important;
+    margin: 0;
+    display: none;
+}
+
+.dropdown-menu.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-item {
+    text-decoration: none !important; /* ลบเส้นใต้ */
+    color: #333 !important;
+    padding: 12px 20px;
+    display: block;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+    color: var(--admin-accent) !important;
+}
+
+.dropdown-item.logout {
+    color: var(--danger) !important;
+    border-top: 1px solid #f5f5f5;
+    margin-top: 5px;
+}
+
+/* =========================================
+   6. RESPONSIVE
+   ========================================= */
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 80px 20px 20px 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+    .action-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-box {
+        max-width: 100%;
+    }
+}

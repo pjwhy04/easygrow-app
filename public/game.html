@@ -5,11 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Harvest Rush — เกมเก็บผัก</title>
     
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css"> 
+    <link rel="stylesheet" href="css/game-page.css">
+    
+    <script src="js/watering.js" defer></script>
+    <script src="js/game.js" defer></script> <style>
+        /* สไตล์พิเศษ: บังคับสีโลโก้ Sidebar */
+        .sidebar .logo-text h2 {
+            color: var(--dark-green, #2e7d32) !important;
+        }
+        
+        /* สไตล์ Badge แจ้งเตือน */
+        .nav-badge {
+            background-color: #ff4d4f;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: auto;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <button class="hamburger-btn" id="mobileMenuBtn">☰</button>
     <div class="mobile-overlay" id="mobileOverlay"></div>
+
     <aside class="sidebar">
         <div class="sidebar-logo">
             <div class="logo-icon">
@@ -17,42 +38,41 @@
             </div>
             <div class="logo-text">
                 <h2>EasyGrow</h2>
-                <p></p>
             </div>
         </div>
-            <ul class="nav-menu">
-                <li><a href="dashboard.html" ><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
-                <li><a href="vegetable-library.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
-                <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
-                <li><a href="watering.html"><span class="nav-icon-box">💧</span> <span>การรดน้ำ</span></a></li>
-                <li><a href="game.html" class="active"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
-                <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
-                <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
-                <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
-            </ul>
-
-        <div class="sidebar-footer">
-            
-            <div class="user-profile">
-                <div class="avatar" id="userAvatar">👤</div>
-                <div class="user-info">
-                    <h4 id="sidebarUserName">กำลังโหลด...</h4>
-                    <span id="sidebarUserRole">...</span>
-                </div>
-            </div>
-
-            <button id="logoutBtn" class="btn-logout-full">
-                <svg class="logout-icon-svg" viewBox="0 0 24 24">
-                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-                </svg>
-                <span>ออกจากระบบ</span>
-            </button>
-
-        </div>
+        <ul class="nav-menu">
+            <li><a href="dashboard.html"><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
+            <li><a href="index.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
+            <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
+            <li><a href="watering.html">
+                <span class="nav-icon-box">💧</span> 
+                <span>การรดน้ำ</span>
+                <span id="waterBadge" class="nav-badge" style="display:none;">0</span>
+            </a></li>
+            <li><a href="game.html" class="active"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
+            <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
+            <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
+            <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
+        </ul>
     </aside>
 
+    <header class="top-header">
+        <div class="profile-trigger" id="profileTrigger">
+            <span id="headerUserName" style="font-weight: 500;">...</span>
+            <div class="avatar-header" id="userAvatarHeader">👤</div>
+        </div>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div style="padding: 15px 20px; border-bottom: 1px solid #f5f5f5;">
+                <strong id="menuUserName" style="display:block; font-size:0.9rem;">ชื่อผู้ใช้</strong>
+                <small id="menuUserRole" style="color:#888;">สถานะ</small>
+            </div>
+            <a href="profile.html" class="dropdown-item">โปรไฟล์ของฉัน</a>
+            <button id="logoutBtnHeader" class="dropdown-item logout">ออกจากระบบ</button>
+        </div>
+    </header>
+
     <main class="main-content main-content-game">
-        
         <div class="header-section">
             <h1>Harvest Rush 🥕</h1>
             <p>เก็บผักให้ได้มากที่สุด ระวังของเน่า!</p>
@@ -60,15 +80,12 @@
 
         <div class="game-wrapper-container">
             <div class="wrap" role="application" aria-label="Harvest Rush game">
-                
                 <div class="game-area panel">
                     <canvas id="canvas" width="720" height="540" aria-label="สนามเกม"></canvas>
-                    
                     <div class="movement-controls">
                         <button id="btnLeft" class="game-btn">◀</button>
                         <button id="btnRight" class="game-btn">▶</button>
                     </div>
-
                 </div>
 
                 <div class="right">
@@ -88,13 +105,13 @@
                                 <div class="small">High Score: <strong id="high">0</strong></div>
                             </div>
                         </div>
-
                         <div class="spacer-md"></div>
                         <div class="controls">
                             <button id="start" class="game-btn btn-full btn-start-lg">เริ่มเกม ▶</button>
                         </div>
                         <div style="margin-top:8px;">
                              <button class="btn-ghost btn-full" id="pause">พักเกม</button>
+                             <button class="btn-ghost btn-full" id="btnSound">🔊 เปิดเสียง</button>
                         </div>
                     </div>
 
@@ -112,42 +129,11 @@
                             <li>🥬 ผักกาด = 20</li>
                         </ul>
                     </div>
-
                     <footer>EasyGrow Game Center</footer>
                 </div>
-
             </div>
         </div>
-
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Auth Guard
-            const storedUser = localStorage.getItem('easygrowUser');
-            if (!storedUser) { window.location.href = 'index.html'; return; }
-            const user = JSON.parse(storedUser);
-
-            // Setup Sidebar
-            document.getElementById('sidebarUserName').textContent = user.name || 'ผู้ใช้งาน';
-            document.getElementById('sidebarUserRole').textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
-            document.getElementById('userAvatar').textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
-
-            if (user.role !== 'admin') {
-                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
-            }
-
-            // Logout
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                if(confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
-                    localStorage.removeItem('easygrowUser');
-                    window.location.href = 'index.html';
-                }
-            });
-        });
-    </script>
-    
-    <script src="js/game.js"></script>
-
-</body>
+    </body>
 </html>

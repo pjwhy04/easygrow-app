@@ -1,0 +1,239 @@
+/* =========================================
+   1. LAYOUT & VARIABLES
+   ========================================= */
+:root {
+    --card-bg: #ffffff;
+    --primary-green: #2e7d32;
+    --primary-blue: #1565c0;
+    --accent-orange: #ef6c00;
+    --bg-light: #f8f9fa;
+    --text-main: #333;
+    --text-muted: #666;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --border-radius: 16px;
+    --transition: all 0.3s ease;
+}
+
+.main-content {
+    padding: 30px;
+    background-color: var(--bg-light);
+    min-height: 100vh;
+}
+
+/* =========================================
+   2. HEADER SECTION
+   ========================================= */
+.header-section {
+    margin-bottom: 30px;
+}
+
+.header-section h1 {
+    font-size: 1.8rem;
+    color: var(--primary-green);
+    margin: 0 0 8px 0;
+}
+
+.header-section p {
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* =========================================
+   3. SUMMARY CARDS (GRID)
+   ========================================= */
+.summary-row {
+    margin-bottom: 40px;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* วงกลมไอคอน */
+.std-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.summary-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+.summary-count {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.summary-desc {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+/* ปุ่มดูรายชื่อในการ์ดรดน้ำ */
+.btn-water {
+    background-color: #0288d1;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-water:hover {
+    background-color: #01579b;
+    filter: brightness(1.1);
+}
+
+/* =========================================
+   4. RECENT ACTIVITY SECTION
+   ========================================= */
+.recent-activity-section {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    box-shadow: var(--shadow);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-main);
+}
+
+.view-all-link {
+    font-size: 0.9rem;
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.view-all-link:hover {
+    text-decoration: underline;
+}
+
+/* Activity List Item */
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #f5f5f5;
+    gap: 15px;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.plant-icon-box {
+    width: 45px;
+    height: 45px;
+    background: var(--bg-light);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+}
+
+.activity-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.activity-name {
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 2px;
+}
+
+.activity-meta {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Badges (สถานะต่างๆ) */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-planted { background: #e3f2fd; color: #1565c0; }
+.status-growing { background: #e8f5e9; color: #2e7d32; }
+.status-ready { background: #fff3e0; color: #ef6c00; }
+.status-harvested { background: #f5f5f5; color: #757575; }
+
+/* =========================================
+   5. RESPONSIVE DESIGN
+   ========================================= */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 15px;
+    }
+    
+    .summary-row {
+        grid-template-columns: repeat(2, 1fr) !important; /* บนมือถือโชว์แถวละ 2 การ์ด */
+    }
+    
+    .activity-item {
+        flex-wrap: wrap;
+    }
+    
+    .status-badge {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-row {
+        grid-template-columns: 1fr !important; /* จอเล็กมากโชว์แถวละ 1 การ์ด */
+    }
+    
+    .header-section h1 {
+        font-size: 1.5rem;
+    }
+}

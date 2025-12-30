@@ -1,0 +1,355 @@
+/* =========================================
+   1. LAYOUT & GRID
+   ========================================= */
+:root {
+    --primary-green: #2e7d32;
+    --light-green: #4caf50;
+    --soft-green: #e8f5e9;
+    --brown-earth: #795548;
+    --yellow-sun: #fbc02d;
+    --dark-slate: #37474f;
+    --text-main: #333;
+    --text-muted: #666;
+    --white: #ffffff;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --border-radius: 16px;
+    --transition: all 0.3s ease;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* แบ่งซ้าย 1 ส่วน ขวา 2 ส่วน */
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.profile-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow);
+}
+
+/* =========================================
+   2. LEFT CARD (USER SUMMARY)
+   ========================================= */
+.left-card {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-img-wrapper {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin-bottom: 20px;
+}
+
+#profileImageDisplay {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid var(--soft-green);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* ไอคอนกล้องสำหรับอัปโหลด */
+.camera-icon {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: var(--primary-green);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: 3px solid white;
+    transition: var(--transition);
+}
+
+.camera-icon:hover {
+    transform: scale(1.1);
+    background: var(--light-green);
+}
+
+#displayHugeName {
+    margin: 10px 0 5px 0;
+    font-size: 1.5rem;
+    color: var(--text-main);
+}
+
+.role-badge {
+    background: var(--soft-green);
+    color: var(--primary-green);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.left-card-details {
+    margin-top: 25px;
+    width: 100%;
+    text-align: left;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.left-card-details p {
+    margin: 12px 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* =========================================
+   3. RIGHT CARD (STATS & INFO)
+   ========================================= */
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.card-header-row h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--primary-green);
+}
+
+/* Info Box Styling */
+.info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.info-row label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.info-box {
+    padding: 12px 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+/* =========================================
+   4. STATS BOXES (สถิติสี่เหลี่ยมสี)
+   ========================================= */
+.stats-boxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.stat-box {
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+    transition: var(--transition);
+}
+
+.stat-box .icon { font-size: 1.5rem; margin-bottom: 5px; display: block; }
+.stat-box h2 { margin: 5px 0; font-size: 1.8rem; }
+.stat-box p { margin: 0; font-size: 0.85rem; opacity: 0.9; }
+
+/* เฉดสีต่างๆ */
+.stat-box.green { background: var(--light-green); }
+.stat-box.brown { background: var(--brown-earth); }
+.stat-box.yellow { background: var(--yellow-sun); }
+.stat-box.dark { background: var(--dark-slate); }
+
+.stat-box:hover { transform: translateY(-5px); filter: brightness(1.1); }
+
+/* Banner ความสำเร็จ */
+.achievement-banner {
+    margin-top: 30px;
+    padding: 20px;
+    background: linear-gradient(to right, #fff9c4, #fffde7);
+    border-radius: 12px;
+    border-left: 5px solid var(--yellow-sun);
+    color: #827717;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* =========================================
+   5. EDIT MODE & FORMS
+   ========================================= */
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+
+.form-group-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+/* Buttons */
+.btn-edit-profile, .btn-save-profile {
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-save-profile { width: 100%; padding: 14px; margin-top: 10px; }
+
+.btn-cancel-edit {
+    background: #eee;
+    color: #666;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* =========================================
+   6. RESPONSIVE
+   ========================================= */
+@media (max-width: 992px) {
+    .profile-grid {
+        grid-template-columns: 1fr; /* ยุบรวมเป็นแถวเดียวบน Tablet/Mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .info-row { grid-template-columns: 1fr; }
+    .form-group-row { flex-direction: column; }
+    .stats-boxes { grid-template-columns: 1fr 1fr; }
+}
+
+/* =========================================
+   7. DROPDOWN MENU FIX (เพิ่มส่วนนี้เพื่อให้สวยเหมือนหน้าอื่น)
+   ========================================= */
+.dropdown-menu {
+    position: absolute;
+    top: 70px;          /* ปรับให้พอดีกับความสูง Header */
+    right: 20px;
+    background: #ffffff;
+    width: 220px;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.15); /* เงานุ่มขึ้น */
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1100;      /* ให้ลอยเหนือทุกอย่าง */
+    border: 1px solid #f0f0f0;
+    padding: 8px 0;
+}
+
+.dropdown-menu.active {
+    display: flex;
+    animation: fadeIn 0.2s ease;
+}
+
+/* ส่วนหัวของ Dropdown */
+.dropdown-header-info {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f5f5f5;
+    background-color: #fafafa;
+}
+
+.dropdown-header-info strong {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+.dropdown-header-info p {
+    margin: 2px 0 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* รายการเมนู */
+.dropdown-item {
+    padding: 12px 20px;
+    text-decoration: none;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+    color: var(--primary-green);
+}
+
+/* ปุ่ม Logout สีแดง */
+.dropdown-item.logout {
+    color: #d32f2f;
+    border-top: 1px solid #f5f5f5;
+    margin-top: 5px;
+    padding-top: 15px;
+}
+
+.dropdown-item.logout:hover {
+    background-color: #fff0f0;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ปรับ Avatar ใน Header ให้กลมและสวย */
+.avatar-header {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

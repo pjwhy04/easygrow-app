@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>จัดการผู้ใช้งาน - EasyGrow</title>
     
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css"> 
+    <link rel="stylesheet" href="css/user-management.css">
     
     <script src="js/user-management.js" defer></script>
+    <script src="js/watering.js" defer></script>
 </head>
 <body>
     <button class="hamburger-btn" id="mobileMenuBtn">☰</button>
     <div class="mobile-overlay" id="mobileOverlay"></div>
+
     <aside class="sidebar">
         <div class="sidebar-logo">
             <div class="logo-icon">
@@ -19,50 +22,55 @@
             </div>
             <div class="logo-text">
                 <h2>EasyGrow</h2>
-                <p></p>
             </div>
         </div>
 
-            <ul class="nav-menu">
-                <li><a href="dashboard.html" ><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
-                <li><a href="vegetable-library.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
-                <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
-                <li><a href="watering.html"><span class="nav-icon-box">💧</span> <span>การรดน้ำ</span></a></li>
-                <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
-                <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
-                <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
-                <li class="admin-only"><a href="user-management.html" class="active"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
-            </ul>
-
-        <div class="sidebar-footer">
+        <ul class="nav-menu">
+            <li><a href="dashboard.html"><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
+            <li><a href="index.html"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
+            <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
+            <li>
+                <a href="watering.html">
+                    <span class="nav-icon-box">💧</span> 
+                    <span>การรดน้ำ</span> 
+                    <span id="waterBadge" class="nav-badge" style="display:none;">0</span>
+                </a>
+            </li>
+            <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
+            <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
             
-            <div class="user-profile">
-                <div class="avatar" id="userAvatar">👤</div>
-                <div class="user-info">
-                    <h4 id="sidebarUserName">กำลังโหลด...</h4>
-                    <span id="sidebarUserRole">...</span>
-                </div>
-            </div>
-
-            <button id="logoutBtn" class="btn-logout-full">
-                <svg class="logout-icon-svg" viewBox="0 0 24 24">
-                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-                </svg>
-                <span>ออกจากระบบ</span>
-            </button>
-
-        </div>
+            <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
+            <li class="admin-only"><a href="user-management.html" class="active"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
+        </ul>
     </aside>
 
+    <header class="top-header">
+        <div class="profile-trigger" id="profileTrigger">
+            <span id="headerUserName" style="font-weight: 500;">...</span>
+            <div class="avatar-header" id="userAvatarHeader">
+                👤
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div style="padding: 15px 20px; border-bottom: 1px solid #f5f5f5;">
+                <strong id="menuUserName" style="display:block; font-size:0.9rem;">ชื่อผู้ใช้</strong>
+                <small id="menuUserRole" style="color:#888;">สถานะ</small>
+            </div>
+            <a href="profile.html" class="dropdown-item">โปรไฟล์ของฉัน</a>
+            <button id="logoutBtnHeader" class="dropdown-item logout">ออกจากระบบ</button>
+        </div>
+    </header>
+    
     <main class="main-content">
         <div class="header-section">
             <h1>จัดการผู้ใช้งาน 👥</h1>
-            <p>จัดการบัญชีผู้ใช้และกำหนดสิทธิ์การเข้าถึง</p>
+            <p>จัดการบัญชีผู้ใช้และกำหนดสิทธิ์การเข้าถึงในระบบ EasyGrow</p>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon" style="background-color: #e8f5e9; color: #2e7d32;">👤</div>
+                <div class="stat-icon" style="background-color: #e8f5e9; color: #2e7d32;">👥</div>
                 <div class="stat-info">
                     <h3 id="statTotal">0</h3>
                     <p>ผู้ใช้ทั้งหมด</p>
@@ -84,7 +92,7 @@
             </div>
         </div>
 
-        <div style="box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 15px;">
+        <div style="box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 15px; background: white; overflow: hidden;">
             <div class="action-bar">
                 <div class="search-box">
                     <span class="search-icon">🔍</span>
@@ -116,7 +124,7 @@
 
     <div class="modal-overlay" id="userModal">
         <div class="modal-content">
-            <h2 style="color: #1a4d2e; margin-top: 0;">เพิ่มผู้ใช้งานใหม่</h2>
+            <h2 style="color: #2e7d32; margin-top: 0; margin-bottom: 20px;">เพิ่มผู้ใช้งานใหม่</h2>
             <form id="addUserForm">
                 <div class="form-group">
                     <label>ชื่อ-นามสกุล</label>
@@ -127,15 +135,15 @@
                     <input type="email" id="newUserEmail" class="form-control" required placeholder="somchai@example.com">
                 </div>
                 <div class="form-group">
-                    <label>สถานะ</label>
+                    <label>สถานะสิทธิ์</label>
                     <select id="newUserRole" class="form-control">
-                        <option value="user">ผู้ใช้ทั่วไป</option>
-                        <option value="admin">ผู้ดูแลระบบ</option>
+                        <option value="user">ผู้ใช้ทั่วไป (ชาวสวน)</option>
+                        <option value="admin">ผู้ดูแลระบบ (Admin)</option>
                     </select>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" id="btnCancel">ยกเลิก</button>
-                    <button type="submit" class="btn-submit">เพิ่มผู้ใช้</button>
+                    <button type="submit" class="btn-submit">บันทึกข้อมูล</button>
                 </div>
             </form>
         </div>

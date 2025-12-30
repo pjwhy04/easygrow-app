@@ -1,0 +1,242 @@
+/* =========================================
+   1. GLOBAL SETTINGS & VARIABLES
+   ========================================= */
+:root {
+    --primary-green: #2e7d32;
+    --light-green: #4caf50;
+    --soft-green: #e8f5e9;
+    --accent-orange: #ff9800;
+    --error-red: #d32f2f;
+    --text-dark: #2d3436;
+    --text-muted: #636e72;
+    --white: #ffffff;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --border-radius: 16px;
+    --transition: all 0.3s ease;
+}
+
+.landing-body {
+    margin: 0;
+    font-family: 'Kanit', sans-serif;
+    background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* =========================================
+   2. LAYOUT (SPLIT SCREEN)
+   ========================================= */
+.landing-container {
+    display: flex;
+    max-width: 1000px;
+    width: 100%;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.info-side {
+    flex: 1;
+    background: var(--primary-green);
+    color: var(--white);
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-side {
+    flex: 1.2;
+    padding: 60px;
+}
+
+/* =========================================
+   3. LEFT SIDE (INFO SECTION)
+   ========================================= */
+.info-side h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.tagline {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 40px;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 25px;
+    font-size: 1rem;
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+}
+
+/* =========================================
+   4. RIGHT SIDE (FORM SECTION)
+   ========================================= */
+.register-box h2 {
+    color: var(--primary-green);
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    color: var(--text-muted);
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.input-wrapper input:focus {
+    outline: none;
+    border-color: var(--light-green);
+    box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+}
+
+/* Checkbox */
+.terms-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.terms-checkbox input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Button */
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-login:hover {
+    background: var(--light-green);
+    transform: translateY(-2px);
+}
+
+.btn-login:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Error Message */
+.error-message {
+    background: #ffebee;
+    color: var(--error-red);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    display: none; /* คุมด้วย JS */
+    border-left: 4px solid var(--error-red);
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 25px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.register-link a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* =========================================
+   5. ANIMATIONS & RESPONSIVE
+   ========================================= */
+.shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+@media (max-width: 900px) {
+    .landing-container {
+        flex-direction: column;
+    }
+    .info-side {
+        padding: 40px;
+    }
+    .login-side {
+        padding: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-side {
+        display: none; /* ซ่อนฝั่งซ้ายบนมือถือเล็กเพื่อให้ฟอร์มเด่น */
+    }
+    .landing-body {
+        padding: 10px;
+    }
+}

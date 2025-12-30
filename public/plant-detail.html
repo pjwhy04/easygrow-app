@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รายละเอียดผัก - EasyGrow</title>
     
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css"> 
+    <link rel="stylesheet" href="css/plant-detail-page.css">
     
     <script src="js/plant-detail.js" defer></script>
+    <script src="js/watering.js" defer></script>
 </head>
 <body>
     <button class="hamburger-btn" id="mobileMenuBtn">☰</button>
     <div class="mobile-overlay" id="mobileOverlay"></div>
+
     <aside class="sidebar">
         <div class="sidebar-logo">
             <div class="logo-icon">
@@ -19,43 +22,46 @@
             </div>
             <div class="logo-text">
                 <h2>EasyGrow</h2>
-                <p></p>
             </div>
         </div>
 
-            <ul class="nav-menu">
-                <li><a href="dashboard.html" ><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
-                <li><a href="vegetable-library.html"class="active"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
-                <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
-                <li><a href="watering.html"><span class="nav-icon-box">💧</span> <span>การรดน้ำ</span></a></li>
-                <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
-                <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
-                <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
-                <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
-            </ul>
-
-        <div class="sidebar-footer">
+        <ul class="nav-menu">
+            <li><a href="dashboard.html"><span class="nav-icon-box">📊</span> <span>แดชบอร์ด</span></a></li>
+            <li><a href="index.html" class="active"><span class="nav-icon-box">📚</span> <span>คลังข้อมูลผัก</span></a></li>
+            <li><a href="planting-log.html"><span class="nav-icon-box">📅</span> <span>บันทึกการปลูก</span></a></li>
+            <li>
+                <a href="watering.html">
+                    <span class="nav-icon-box">💧</span> 
+                    <span>การรดน้ำ</span>
+                    <span id="waterBadge" class="nav-badge" style="display:none;">0</span>
+                </a>
+            </li>
+            <li><a href="game.html"><span class="nav-icon-box">🎮</span> <span>มินิเกม</span></a></li>
+            <li><a href="profile.html"><span class="nav-icon-box">👤</span> <span>โปรไฟล์</span></a></li>
             
-            <div class="user-profile">
-                <div class="avatar" id="userAvatar">👤</div>
-                <div class="user-info">
-                    <h4 id="sidebarUserName">กำลังโหลด...</h4>
-                    <span id="sidebarUserRole">...</span>
-                </div>
-            </div>
-
-            <button id="logoutBtn" class="btn-logout-full">
-                <svg class="logout-icon-svg" viewBox="0 0 24 24">
-                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-                </svg>
-                <span>ออกจากระบบ</span>
-            </button>
-
-        </div>
+            <li class="admin-only"><a href="manage-vegetables.html"><span class="nav-icon-box">⚙️</span> <span>จัดการข้อมูลผัก</span></a></li>
+            <li class="admin-only"><a href="user-management.html"><span class="nav-icon-box">👥</span> <span>จัดการผู้ใช้งาน</span></a></li>
+        </ul>
     </aside>
  
+    <header class="top-header">
+        <div class="profile-trigger" id="profileTrigger">
+            <span id="headerUserName" style="font-weight: 500;">...</span>
+            <div class="avatar-header" id="userAvatarHeader">👤</div>
+        </div>
+
+        <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-header">
+                <strong id="menuUserName">ชื่อผู้ใช้</strong>
+                <p id="menuUserRole">สถานะ</p>
+            </div>
+            <a href="profile.html" class="dropdown-item">โปรไฟล์ของฉัน</a>
+            <button id="logoutBtnHeader" class="dropdown-item logout">ออกจากระบบ</button>
+        </div>
+    </header>
+    
     <main class="main-content">
-        <a href="vegetable-library.html" class="back-link">← กลับไปที่คลังข้อมูล</a>
+        <a href="index.html" class="back-link">← กลับไปที่คลังข้อมูล</a>
 
         <div class="detail-container" id="detailContainer">
             <p class="loading-text">กำลังโหลดข้อมูลผัก...</p>
