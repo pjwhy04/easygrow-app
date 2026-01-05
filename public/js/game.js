@@ -1,9 +1,9 @@
 /**
  * js/game.js
  * - ระบบมินิเกม Harvest Rush (Final Version)
- * - ย้ายปุ่มเสียงไป HTML แล้ว
+ * - รองรับ Auto-Sync รูปโปรไฟล์จาก Server
  * - ผักตกช้าลง (Easy Mode)
- * - ปรับการเกิดผักให้ห่างกันมากขึ้น (ไม่รกรุงรัง)
+ * - ปรับการเกิดผักให้ห่างกันมากขึ้น
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -41,8 +41,85 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================
     // 2. Setup Header UI & Mobile Menu
     // ==========================================
-    setupHeaderUI(user, webLogo);
+    
+    // 2.1 ฟังก์ชันอัปเดตข้อมูลบน Header (แยกออกมาเพื่อให้เรียกซ้ำได้)
+    const updateHeaderData = (userData) => {
+        const headerUserName = document.getElementById('headerUserName');
+        const userAvatarHeader = document.getElementById('userAvatarHeader');
+        const menuUserName = document.getElementById('menuUserName');
+        const menuUserRole = document.getElementById('menuUserRole');
+
+        // User Info
+        if (headerUserName) headerUserName.textContent = userData.name || 'ผู้ใช้งาน';
+        if (menuUserName) menuUserName.textContent = userData.name || 'ผู้ใช้งาน';
+        if (menuUserRole) menuUserRole.textContent = userData.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
+
+        // Avatar
+        if (userAvatarHeader) {
+            const profileImg = userData.image_url ? userData.image_url : webLogo;
+            userAvatarHeader.innerHTML = `
+                <img src="${profileImg}" 
+                     onerror="this.src='${webLogo}'" 
+                     style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            userAvatarHeader.style.backgroundColor = 'transparent';
+        }
+
+        // Hide Admin Menu if not admin
+        if (userData.role !== 'admin') {
+            document.querySelectorAll('.admin-only').forEach(el => el.style.setProperty('display', 'none', 'important'));
+        }
+    };
+
+    // 2.2 ฟังก์ชันผูกปุ่มต่างๆ บน Header (เรียกครั้งเดียวพอ)
+    const bindHeaderEvents = () => {
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const profileTrigger = document.getElementById('profileTrigger');
+        const logoutBtnHeader = document.getElementById('logoutBtnHeader');
+
+        if (profileTrigger && dropdownMenu) {
+            profileTrigger.onclick = (e) => { 
+                e.stopPropagation(); 
+                dropdownMenu.classList.toggle('active'); 
+            };
+        }
+        
+        window.addEventListener('click', () => {
+            if (dropdownMenu) dropdownMenu.classList.remove('active');
+        });
+
+        if (logoutBtnHeader) {
+            logoutBtnHeader.onclick = (e) => {
+                e.preventDefault();
+                if (confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
+                    localStorage.removeItem('easygrowUser');
+                    window.location.href = 'login.html';
+                }
+            };
+        }
+    };
+
+    // --- เริ่มทำงานส่วน UI ---
+    // A. แสดงผลทันทีด้วยข้อมูลเก่าในเครื่อง
+    updateHeaderData(user);
+    bindHeaderEvents();
     setupMobileMenu();
+
+    // B. ⭐ ดึงข้อมูลล่าสุดจาก Server (Auto Sync) ⭐
+    try {
+        const res = await fetch(`/api/profile?email=${user.email}`);
+        if (res.ok) {
+            const data = await res.json();
+            const latestUser = data.user;
+            
+            // อัปเดต UI อีกครั้งด้วยข้อมูลใหม่
+            updateHeaderData(latestUser);
+            
+            // บันทึกลงเครื่อง
+            localStorage.setItem('easygrowUser', JSON.stringify({ ...user, ...latestUser }));
+        }
+    } catch (err) {
+        console.warn("Sync profile failed:", err);
+    }
 
     // ==========================================
     // 3. Centralized Watering Check
@@ -58,55 +135,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // --- Helper Functions ---
-
-function setupHeaderUI(user, webLogo) {
-    const headerUserName = document.getElementById('headerUserName');
-    const userAvatarHeader = document.getElementById('userAvatarHeader');
-    const menuUserName = document.getElementById('menuUserName');
-    const menuUserRole = document.getElementById('menuUserRole');
-    const dropdownMenu = document.getElementById('dropdownMenu');
-    const profileTrigger = document.getElementById('profileTrigger');
-    const logoutBtnHeader = document.getElementById('logoutBtnHeader');
-
-    // User Info
-    if (headerUserName) headerUserName.textContent = user.name || 'ผู้ใช้งาน';
-    if (menuUserName) menuUserName.textContent = user.name || 'ผู้ใช้งาน';
-    if (menuUserRole) menuUserRole.textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
-
-    if (userAvatarHeader) {
-        const profileImg = user.image_url ? user.image_url : webLogo;
-        userAvatarHeader.innerHTML = `
-            <img src="${profileImg}" 
-                 onerror="this.src='${webLogo}'" 
-                 style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-        userAvatarHeader.style.backgroundColor = 'transparent';
-    }
-
-    if (user.role !== 'admin') {
-        document.querySelectorAll('.admin-only').forEach(el => el.style.setProperty('display', 'none', 'important'));
-    }
-
-    if (profileTrigger && dropdownMenu) {
-        profileTrigger.onclick = (e) => { 
-            e.stopPropagation(); 
-            dropdownMenu.classList.toggle('active'); 
-        };
-    }
-    
-    window.addEventListener('click', () => {
-        if (dropdownMenu) dropdownMenu.classList.remove('active');
-    });
-
-    if (logoutBtnHeader) {
-        logoutBtnHeader.onclick = (e) => {
-            e.preventDefault();
-            if (confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
-                localStorage.removeItem('easygrowUser');
-                window.location.href = 'login.html';
-            }
-        };
-    }
-}
 
 function setupMobileMenu() {
     const mobileBtn = document.getElementById('mobileMenuBtn');
@@ -299,8 +327,7 @@ function setupMiniGame() {
             
             gameState.spawnTimer = 0;
             
-            // ⭐ แก้ไขจุดนี้: เพิ่มเวลาหน่วงระหว่างผักแต่ละชิ้น ⭐
-            // เดิม: 30 + 40 (เร็วไป) -> ใหม่: 60 + 80 (ช้าลงมาก)
+            // ⭐ เพิ่มเวลาหน่วงระหว่างผักแต่ละชิ้น (80-140 frames)
             gameState.nextSpawnFrame = Math.floor(Math.random() * 60) + 80; 
         }
 

@@ -240,3 +240,90 @@
         padding: 10px;
     }
 }
+
+/* =========================================
+   6. MODAL (POPUP) STYLES
+   ========================================= */
+.modal {
+    display: none; /* ซ่อนไว้ก่อน */
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5); /* พื้นหลังสีดำจางๆ */
+    backdrop-filter: blur(4px); /* เบลอฉากหลัง */
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto; /* จัดกึ่งกลางแนวตั้ง */
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px; /* ความกว้างสูงสุด */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    position: relative;
+    animation: slideDown 0.3s;
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #000;
+}
+
+.modal-body {
+    max-height: 400px;
+    overflow-y: auto; /* ให้เลื่อนลงอ่านได้ถ้าเนื้อหายาว */
+    margin: 20px 0;
+    line-height: 1.6;
+    color: #555;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.btn-agree {
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1rem;
+}
+
+.btn-agree:hover {
+    background: var(--light-green);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+@keyframes slideDown {
+    from {transform: translateY(-50px);}
+    to {transform: translateY(0);}
+}
+
+/* ลิงก์ใน checkbox */
+.terms-checkbox a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 600;
+}
+.terms-checkbox a:hover {
+    text-decoration: underline;
+}

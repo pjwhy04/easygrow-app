@@ -3,7 +3,8 @@
  * จัดการข้อมูล User และ Permissions สำหรับ Admin
  * - ย้ายโปรไฟล์ไปที่ Header Dropdown มุมขวาบน พร้อมระบบรูปสำรอง (Logo Fallback)
  * - ระบบจัดการผู้ใช้งาน (CRUD) สำหรับผู้ดูแลระบบ
- * - ⭐ ปรับปรุง: เรียกใช้ Master Logic จาก watering.js สำหรับระบบแจ้งเตือนรดน้ำ ⭐
+ * - ⭐ ปรับปรุง: เพิ่มระบบ Auto-Update โปรไฟล์จาก Server (Sync)
+ * - ⭐ ปรับปรุง: เรียกใช้ Master Logic จาก watering.js สำหรับระบบแจ้งเตือนรดน้ำ
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -18,7 +19,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'login.html'; 
         return;
     }
-    const currentUser = JSON.parse(storedUser);
+    
+    // ใช้ let เพื่อให้ update ข้อมูลได้
+    let currentUser = JSON.parse(storedUser);
 
     // ตรวจสอบสิทธิ์ Admin
     if (currentUser.role !== 'admin') {
@@ -30,7 +33,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================
     // 2. Header Profile Setup (มุมขวาบน)
     // ==========================================
+    // 2.1 แสดงผลครั้งแรกทันทีจาก LocalStorage (เพื่อให้ผู้ใช้ไม่ต้องรอ)
     setupHeaderUI(currentUser, webLogo);
+
+    // 2.2 ⭐ Auto-Update: ดึงข้อมูลล่าสุดจาก Server เพื่อให้รูป/ชื่อ เป็นปัจจุบันเสมอ ⭐
+    try {
+        const resProfile = await fetch(`/api/profile?email=${currentUser.email}`);
+        if (resProfile.ok) {
+            const data = await resProfile.json();
+            const latestUser = data.user; // ดึง user object จาก response
+
+            // อัปเดตตัวแปร currentUser ในหน่วยความจำ
+            currentUser = latestUser;
+
+            // อัปเดต UI ส่วนหัวใหม่อีกครั้งด้วยข้อมูลล่าสุด
+            setupHeaderUI(currentUser, webLogo);
+
+            // บันทึกลง LocalStorage เพื่อให้หน้าอื่นได้ข้อมูลใหม่ด้วย
+            localStorage.setItem('easygrowUser', JSON.stringify(currentUser));
+        }
+    } catch (err) {
+        console.warn("ไม่สามารถดึงข้อมูลโปรไฟล์ล่าสุดได้ ใช้ข้อมูลเดิมจากเครื่องแทน", err);
+    }
 
     // ==========================================
     // ⭐ 3. CENTRALIZED WATERING CHECK (Master Logic) ⭐
@@ -206,13 +230,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             hAvatar.innerHTML = `<img src="${profileImg}" onerror="this.src='${logo}'" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
         }
 
+        // ป้องกัน Event Listener ซ้ำซ้อน (Reset ก่อน)
         if (trigger && menu) {
-            trigger.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('active'); };
-            window.addEventListener('click', () => menu.classList.remove('active'));
+            // Clone เพื่อลบ Event Listener เก่าออก (ถ้ามี)
+            const newTrigger = trigger.cloneNode(true);
+            trigger.parentNode.replaceChild(newTrigger, trigger);
+            
+            newTrigger.onclick = (e) => { 
+                e.stopPropagation(); 
+                menu.classList.toggle('active'); 
+            };
+            
+            // ใช้ Event Delegation หรือตัวแปร Global เพื่อจัดการ window click แทนการ add ซ้ำๆ
+            window.onclick = () => menu.classList.remove('active');
         }
 
         if (logout) {
-            logout.onclick = () => {
+            const newLogout = logout.cloneNode(true);
+            logout.parentNode.replaceChild(newLogout, logout);
+            newLogout.onclick = () => {
                 if (confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
                     localStorage.removeItem('easygrowUser');
                     window.location.href = 'login.html';

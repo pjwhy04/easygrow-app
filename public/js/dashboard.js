@@ -2,6 +2,7 @@
  * dashboard.js
  * - จัดการหน้าแดชบอร์ด สถิติ และกิจกรรมล่าสุด
  * - ปรับปรุง Header UI และ Mobile Menu ให้เหมือน index.js
+ * - ⭐ ปรับปรุง: เพิ่มระบบดึงรูปโปรไฟล์ล่าสุดจาก Server (Auto Sync)
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -49,23 +50,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     const profileTrigger = document.getElementById('profileTrigger');
     const dropdownMenu = document.getElementById('dropdownMenu');
 
-    // 2.1 แสดงข้อมูล User
-    if (headerUserName) headerUserName.textContent = user.name || 'ผู้ใช้งาน';
-    if (menuUserName) menuUserName.textContent = user.name || 'ผู้ใช้งาน';
-    if (menuUserRole) menuUserRole.textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
+    // --- ฟังก์ชันอัปเดต UI ส่วนหัว (แยกออกมาเพื่อให้เรียกซ้ำได้เมื่อข้อมูลอัปเดต) ---
+    function updateHeaderUI(userData) {
+        if (headerUserName) headerUserName.textContent = userData.name || 'ผู้ใช้งาน';
+        if (menuUserName) menuUserName.textContent = userData.name || 'ผู้ใช้งาน';
+        if (menuUserRole) menuUserRole.textContent = userData.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
 
-    if (userAvatarHeader) {
-        const profileImg = user.image_url ? user.image_url : webLogo;
-        userAvatarHeader.innerHTML = `
-            <img src="${profileImg}" 
-                 onerror="this.src='${webLogo}'" 
-                 style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-        userAvatarHeader.style.backgroundColor = 'transparent';
+        if (userAvatarHeader) {
+            const profileImg = userData.image_url ? userData.image_url : webLogo;
+            userAvatarHeader.innerHTML = `
+                <img src="${profileImg}" 
+                     onerror="this.src='${webLogo}'" 
+                     style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            userAvatarHeader.style.backgroundColor = 'transparent';
+        }
+
+        // ซ่อนเมนู Admin ถ้าไม่ใช่ Admin
+        if (userData.role !== 'admin') {
+            document.querySelectorAll('.admin-only').forEach(el => el.style.setProperty('display', 'none', 'important'));
+        }
     }
 
-    // 2.2 ซ่อนเมนู Admin ถ้าไม่ใช่ Admin
-    if (user.role !== 'admin') {
-        document.querySelectorAll('.admin-only').forEach(el => el.style.setProperty('display', 'none', 'important'));
+    // 2.1 แสดงผลครั้งแรกทันทีจาก LocalStorage (เพื่อให้ผู้ใช้ไม่ต้องรอ)
+    updateHeaderUI(user);
+
+    // 2.2 ⭐ ดึงข้อมูลล่าสุดจาก Server (Sync) เพื่อให้รูป/ชื่อ เป็นปัจจุบันเสมอ ⭐
+    try {
+        const resProfile = await fetch(`/api/profile?email=${user.email}`);
+        if (resProfile.ok) {
+            const data = await resProfile.json();
+            const latestUser = data.user;
+
+            // อัปเดตหน้าจอด้วยข้อมูลใหม่
+            updateHeaderUI(latestUser);
+
+            // อัปเดต LocalStorage ด้วย (หน้าอื่นจะได้ข้อมูลใหม่ด้วย)
+            const updatedStorage = { ...user, ...latestUser };
+            localStorage.setItem('easygrowUser', JSON.stringify(updatedStorage));
+        }
+    } catch (err) {
+        console.warn("ไม่สามารถดึงข้อมูลโปรไฟล์ล่าสุดได้ ใช้ข้อมูลเดิมจากเครื่องแทน", err);
     }
 
     // 2.3 ปุ่มออกจากระบบ
@@ -93,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // ==========================================
-    // 3. Mobile Menu Logic (เพิ่มส่วนนี้เพื่อให้เมนูมือถือทำงาน)
+    // 3. Mobile Menu Logic
     // ==========================================
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const mobileOverlay = document.getElementById('mobileOverlay');

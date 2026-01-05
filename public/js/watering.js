@@ -2,6 +2,7 @@
  * watering.js - Master Logic & Watering Page Controller
  * - ฉบับอัปเกรด: รองรับ Array ["เช้า","กลางวัน","เย็น"]
  * - แก้ปัญหา: ข้ามวันรีเซ็ตใหม่ / เปลี่ยนช่วงเวลาแจ้งเตือนซ้ำ
+ * - ⭐ ปรับปรุง: เพิ่มระบบ Auto-Update Profile ดึงข้อมูลล่าสุดจาก Server
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -44,20 +45,39 @@ document.addEventListener('DOMContentLoaded', async () => {
             sidebarLogoText.style.fontWeight = '600';
         }
 
-        // 2.2 Setup UI
+        // 2.2 Setup UI (แสดงผลครั้งแรกจาก LocalStorage ไปก่อนเพื่อความเร็ว)
         setupHeaderUI(user, webLogo);
         setupMobileMenu();
 
-        // 2.3 Render การ์ดรดน้ำ (ใช้ Logic ใหม่)
+        // ⭐ 2.3 NEW: Auto-Update Profile (Sync with Server) ⭐
+        // ดึงข้อมูลล่าสุดจาก Server มาทับ เพื่อให้รูปและชื่อเป็นปัจจุบันเสมอ
+        try {
+            const resProfile = await fetch(`/api/profile?email=${user.email}`);
+            if (resProfile.ok) {
+                const data = await resProfile.json();
+                const latestUser = data.user;
+
+                // อัปเดตข้อมูลใน RAM และ LocalStorage
+                user = { ...user, ...latestUser };
+                localStorage.setItem('easygrowUser', JSON.stringify(user));
+
+                // รีเฟรช Header UI อีกรอบด้วยข้อมูลใหม่
+                setupHeaderUI(user, webLogo);
+                console.log("✅ Profile Updated from Server");
+            }
+        } catch (err) {
+            console.warn("Profile sync failed, using cached data:", err);
+        }
+
+        // 2.4 Render การ์ดรดน้ำ (ใช้ Logic ใหม่)
         renderWateringCards(user);
     }
 
     // ==========================================
     // 3. รันระบบคำนวณและแจ้งเตือน (Global Sync)
     // ==========================================
-    if (isWateringPage) {
-        await window.syncWateringStatus(user.email);
-    }
+    // ทำงานทุกหน้าที่มีการ import watering.js
+    await window.syncWateringStatus(user.email);
 });
 
 /**

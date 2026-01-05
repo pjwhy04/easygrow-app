@@ -1,7 +1,8 @@
 /**
- * index.js (Fixed Guest Dropdown)
- * - แก้ไขให้ Guest กดรูปโปรไฟล์แล้วเมนูเด้งขึ้นมา (ย้าย onclick ออกมานอกเงื่อนไข)
- * - ระบบอื่นๆ ยังคงเดิมไม่เปลี่ยนแปลง
+ * index.js 
+ * - หน้าแรก / คลังข้อมูลผัก (Public & User View)
+ * - รองรับทั้ง User และ Guest (ผู้เยี่ยมชม)
+ * - แสดงผลการ์ดผัก และ ระบบค้นหา
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -9,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const webLogo = '/images/logo.png'; 
 
     // ==========================================
-    // 0. แก้ไขสีโลโก้ Sidebar
+    // 0. แก้ไขสีโลโก้ Sidebar (Consistency UI)
     // ==========================================
     const sidebarLogoText = document.querySelector('.sidebar .logo-text h2');
     if (sidebarLogoText) {
@@ -62,8 +63,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
         }
 
-        // ⭐ เรียกใช้ Master Logic จาก watering.js
-        if (window.syncWateringStatus) {
+        // ⭐ เรียกใช้ Master Logic จาก watering.js (ถ้ามี)
+        if (typeof window.syncWateringStatus === 'function') {
             await window.syncWateringStatus(user.email, false);
         }
 
@@ -85,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             userAvatarHeader.innerHTML = `<img src="${webLogo}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
         }
         
-        // สร้างปุ่ม Login ให้ Guest
+        // สร้างเมนู Login ให้ Guest (แทนที่เมนู User เดิม)
         if (dropdownMenu) {
             dropdownMenu.innerHTML = `
                 <div style="padding: 15px; text-align: center;">
@@ -138,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!gridContainer) return;
         gridContainer.innerHTML = ''; 
 
-        // Promo Card สำหรับ Guest
+        // Promo Card สำหรับ Guest (เชิญชวนให้สมัคร)
         if (!user) {
             const promoCard = document.createElement('div');
             promoCard.className = 'veg-card';
@@ -191,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ==========================================
-    // 🍔 Mobile Menu Logic
+    // 🍔 Mobile Menu Logic (Sidebar)
     // ==========================================
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const mobileOverlay = document.getElementById('mobileOverlay');

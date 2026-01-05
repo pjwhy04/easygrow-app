@@ -2,6 +2,7 @@
  * planting-log.js
  * - จัดการระบบ Kanban Board (เพิ่ม/แก้ไข/ลบ/เปลี่ยนสถานะ)
  * - ปรับปรุง Header UI, Sidebar และ Auth ให้เสถียรตามมาตรฐานหน้า index.js
+ * - ⭐ เพิ่มระบบ Auto-Update Profile (Sync รูปและชื่อล่าสุดจาก Server)
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -37,9 +38,82 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ==========================================
-    // 2. Setup Header UI & Sidebar
+    // 2. Setup Header UI & Profile Auto-Update
     // ==========================================
-    setupHeaderUI(user, webLogo);
+    const headerUserName = document.getElementById('headerUserName');
+    const userAvatarHeader = document.getElementById('userAvatarHeader');
+    const menuUserName = document.getElementById('menuUserName');
+    const menuUserRole = document.getElementById('menuUserRole');
+    const logoutBtnHeader = document.getElementById('logoutBtnHeader');
+    
+    // Dropdown Elements
+    const profileTrigger = document.getElementById('profileTrigger');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    // --- ฟังก์ชันอัปเดต UI ส่วนหัว (แยกออกมาเพื่อให้เรียกซ้ำได้เมื่อข้อมูลอัปเดต) ---
+    function updateHeaderUI(userData) {
+        if (headerUserName) headerUserName.textContent = userData.name || 'ผู้ใช้งาน';
+        if (menuUserName) menuUserName.textContent = userData.name || 'ผู้ใช้งาน';
+        if (menuUserRole) menuUserRole.textContent = userData.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
+
+        if (userAvatarHeader) {
+            const profileImg = userData.image_url ? userData.image_url : webLogo;
+            userAvatarHeader.innerHTML = `
+                <img src="${profileImg}" 
+                     onerror="this.src='${webLogo}'" 
+                     style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        }
+
+        // ซ่อนเมนู Admin ถ้าไม่ใช่ Admin
+        if (userData.role !== 'admin') {
+            document.querySelectorAll('.admin-only').forEach(el => el.style.setProperty('display', 'none', 'important'));
+        }
+    }
+
+    // 2.1 แสดงผลครั้งแรกทันทีจาก LocalStorage (เพื่อให้ผู้ใช้ไม่ต้องรอ)
+    updateHeaderUI(user);
+
+    // 2.2 ⭐ ดึงข้อมูลล่าสุดจาก Server (Sync) เพื่อให้รูป/ชื่อ เป็นปัจจุบันเสมอ ⭐
+    try {
+        const resProfile = await fetch(`/api/profile?email=${user.email}`);
+        if (resProfile.ok) {
+            const data = await resProfile.json();
+            const latestUser = data.user;
+
+            // อัปเดตหน้าจอด้วยข้อมูลใหม่
+            updateHeaderUI(latestUser);
+
+            // อัปเดต LocalStorage ด้วย (หน้าอื่นจะได้ข้อมูลใหม่ด้วย)
+            const updatedStorage = { ...user, ...latestUser };
+            localStorage.setItem('easygrowUser', JSON.stringify(updatedStorage));
+            user = updatedStorage; // อัปเดตตัวแปร user ในหน่วยความจำปัจจุบัน
+        }
+    } catch (err) {
+        console.warn("ไม่สามารถดึงข้อมูลโปรไฟล์ล่าสุดได้ ใช้ข้อมูลเดิมจากเครื่องแทน", err);
+    }
+
+    // 2.3 ตั้งค่า Event Listeners (Dropdown & Logout)
+    if (logoutBtnHeader) {
+        logoutBtnHeader.onclick = (e) => {
+            e.preventDefault();
+            if (confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
+                localStorage.removeItem('easygrowUser');
+                window.location.href = 'login.html';
+            }
+        };
+    }
+
+    if (profileTrigger && dropdownMenu) {
+        profileTrigger.onclick = (e) => { 
+            e.stopPropagation(); 
+            dropdownMenu.classList.toggle('active'); 
+        };
+    }
+    window.addEventListener('click', () => {
+        if (dropdownMenu) dropdownMenu.classList.remove('active');
+    });
+
+    // Setup Mobile Menu
     setupMobileMenu();
 
     // ==========================================
@@ -272,59 +346,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     function setText(id, text) {
         const el = document.getElementById(id);
         if (el) el.textContent = text;
-    }
-
-    // ⭐ Header UI Setup Logic (เหมือน index.js) ⭐
-    function setupHeaderUI(user, webLogo) {
-        const headerUserName = document.getElementById('headerUserName');
-        const userAvatarHeader = document.getElementById('userAvatarHeader');
-        const menuUserName = document.getElementById('menuUserName');
-        const menuUserRole = document.getElementById('menuUserRole');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        const profileTrigger = document.getElementById('profileTrigger');
-        const logoutBtn = document.getElementById('logoutBtnHeader');
-
-        // แสดงข้อมูล User
-        if (headerUserName) headerUserName.textContent = user.name || 'ผู้ใช้งาน';
-        if (menuUserName) menuUserName.textContent = user.name || 'ผู้ใช้งาน';
-        if (menuUserRole) menuUserRole.textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
-
-        if (userAvatarHeader) {
-            const profileImg = user.image_url ? user.image_url : webLogo;
-            userAvatarHeader.innerHTML = `
-                <img src="${profileImg}" 
-                     onerror="this.src='${webLogo}'" 
-                     style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-        }
-
-        // ซ่อนเมนู Admin
-        if (user.role !== 'admin') {
-            document.querySelectorAll('.admin-only').forEach(el => el.style.setProperty('display', 'none', 'important'));
-        }
-
-        // Toggle Dropdown
-        if (profileTrigger && dropdownMenu) {
-            profileTrigger.onclick = (e) => { 
-                e.stopPropagation(); 
-                dropdownMenu.classList.toggle('active'); 
-            };
-        }
-        
-        // ปิดเมนูเมื่อคลิกที่อื่น
-        window.addEventListener('click', () => {
-            if (dropdownMenu) dropdownMenu.classList.remove('active');
-        });
-
-        // Logout
-        if (logoutBtn) {
-            logoutBtn.onclick = (e) => {
-                e.preventDefault();
-                if (confirm('คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?')) {
-                    localStorage.removeItem('easygrowUser');
-                    window.location.href = 'login.html';
-                }
-            };
-        }
     }
 
     function setupMobileMenu() {

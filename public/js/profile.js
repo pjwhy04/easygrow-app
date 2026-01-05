@@ -3,6 +3,7 @@
  * - จัดการข้อมูลโปรไฟล์ (View/Edit)
  * - จัดการรูปภาพ (Upload) พร้อมระบบรูปสำรองเป็นโลโก้เว็บ (/images/logo.png)
  * - ⭐ ปรับปรุง: เรียกใช้ Master Logic จาก watering.js สำหรับระบบแจ้งเตือนรดน้ำ ⭐
+ * - ⭐ ปรับปรุง: เพิ่มระบบ Auto-Update ข้อมูล Header และ LocalStorage เมื่อโหลดหน้า ⭐
  * - ควบคุม Header Dropdown มุมขวาบน (เรียบเนียน ไม่มีไอคอน/จุด)
  */
 
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================
     // 2. Setup Header & Master Notification Logic
     // ==========================================
-    // ตั้งค่าส่วนหัว (Header)
+    // ตั้งค่าส่วนหัว (Header) แบบเบื้องต้นจากข้อมูลในเครื่อง (เพื่อให้แสดงผลเร็ว)
     setupHeaderProfile(currentUser, DEFAULT_LOGO);
     
     // ⭐ CENTRALIZED WATERING CHECK (Master Logic) ⭐
@@ -34,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ==========================================
-    // 3. Load Profile Page Data (แสดงข้อมูลในหน้า Profile)
+    // 3. Load Profile Page Data (แสดงข้อมูลในหน้า Profile และ Sync ข้อมูลล่าสุด)
     // ==========================================
     await loadProfileData(currentUser.email, DEFAULT_LOGO);
 
@@ -66,6 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /**
  * ดึงข้อมูลโปรไฟล์และสถิติจาก Server มาแสดงในหน้า Profile
+ * และทำการ Sync ข้อมูลล่าสุดกลับไปยัง Header และ LocalStorage
  */
 async function loadProfileData(email, defaultLogo) {
     try {
@@ -75,7 +77,7 @@ async function loadProfileData(email, defaultLogo) {
         if (res.ok) {
             const { user, stats } = data;
 
-            // --- ฝั่งซ้าย (Card โปรไฟล์) ---
+            // --- 1. แสดงผลฝั่งซ้าย (Card โปรไฟล์) ---
             if (document.getElementById('displayHugeName')) document.getElementById('displayHugeName').textContent = user.name;
             if (document.getElementById('displayRole')) document.getElementById('displayRole').textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
             if (document.getElementById('displayEmailSmall')) document.getElementById('displayEmailSmall').textContent = user.email;
@@ -86,14 +88,14 @@ async function loadProfileData(email, defaultLogo) {
             
             if (document.getElementById('displayTotalPlants')) document.getElementById('displayTotalPlants').textContent = stats.total || 0;
 
-            // แสดงรูปในหน้า Profile (Fallback เป็นโลโก้เว็บ)
+            // แสดงรูปในหน้า Profile Card
             const imgDisplay = document.getElementById('profileImageDisplay');
             if (imgDisplay) {
                 imgDisplay.src = user.image_url || defaultLogo;
                 imgDisplay.onerror = () => { imgDisplay.src = defaultLogo; };
             }
 
-            // --- ฝั่งขวา (View Mode) ---
+            // --- 2. แสดงผลฝั่งขวา (View Mode) ---
             if (document.getElementById('displayName')) document.getElementById('displayName').textContent = user.name;
             if (document.getElementById('displayEmail')) document.getElementById('displayEmail').textContent = user.email;
 
@@ -104,7 +106,26 @@ async function loadProfileData(email, defaultLogo) {
             safeSetText('statHarvested', stats.harvested || 0);
             safeSetText('bannerTotal', stats.total || 0);
 
+            // ใส่ค่าในฟอร์มแก้ไขรอไว้เลย
             if (document.getElementById('editName')) document.getElementById('editName').value = user.name;
+
+            // --- ⭐ 3. Auto-Update Header UI (Sync ข้อมูลล่าสุดไปยังส่วนหัวทันที) ⭐ ---
+            const headerName = document.getElementById('headerUserName');
+            const headerAvatar = document.getElementById('userAvatarHeader');
+            const menuName = document.getElementById('menuUserName');
+            
+            if (headerName) headerName.textContent = user.name;
+            if (menuName) menuName.textContent = user.name;
+            if (headerAvatar) {
+                const freshImg = user.image_url || defaultLogo;
+                headerAvatar.innerHTML = `<img src="${freshImg}" onerror="this.src='${defaultLogo}'" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            }
+
+            // --- ⭐ 4. Auto-Update LocalStorage (บันทึกข้อมูลล่าสุดลงเครื่อง) ⭐ ---
+            // เพื่อให้หน้าอื่นๆ ได้ข้อมูลที่ถูกต้องทันที ไม่ต้องรอล็อกอินใหม่
+            const currentStored = JSON.parse(localStorage.getItem('easygrowUser')) || {};
+            const updatedStored = { ...currentStored, ...user }; // ผสานข้อมูลใหม่ทับของเก่า
+            localStorage.setItem('easygrowUser', JSON.stringify(updatedStored));
         }
     } catch (err) {
         console.error("Load Profile Error:", err);
@@ -126,7 +147,7 @@ function setupHeaderProfile(user, defaultLogo) {
     if (user) {
         if (headerName) headerName.textContent = user.name;
         if (menuName) menuName.textContent = user.name;
-        if (menuRole) menuUserRole.textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
+        if (menuRole) menuRole.textContent = user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'ชาวสวน';
 
         if (headerAvatar) {
             const profileImg = user.image_url || defaultLogo;

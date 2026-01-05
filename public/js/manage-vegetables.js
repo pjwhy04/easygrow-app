@@ -2,7 +2,7 @@
  * manage-vegetables.js
  * - จัดการข้อมูลผัก (CRUD) สำหรับผู้ดูแลระบบ
  * - ⭐ ปรับปรุง: เรียกใช้ Master Logic จาก watering.js สำหรับระบบแจ้งเตือนรดน้ำ ⭐
- * - ย้ายส่วนโปรไฟล์ไปที่ Top Header Dropdown พร้อมรูปสำรอง (Logo)
+ * - ⭐ ปรับปรุง: เพิ่มระบบ Auto-Update Profile เพื่อดึงรูป/ชื่อล่าสุดจาก Server ⭐
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'login.html'; 
         return; 
     }
-    const user = JSON.parse(storedUser);
+    
+    let user = JSON.parse(storedUser);
     
     if (user.role !== 'admin') { 
         alert('เข้าถึงถูกปฏิเสธ: สำหรับผู้ดูแลระบบเท่านั้น'); 
@@ -28,13 +29,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================
     // 2. Top Header & Dropdown Setup (ส่วนโปรไฟล์)
     // ==========================================
+    // 2.1 ตั้งค่าครั้งแรกโดยใช้ข้อมูลจาก LocalStorage (เพื่อให้แสดงผลทันที)
     setupHeaderUI(user, webLogo);
+
+    // 2.2 ⭐ Auto-Update: ดึงข้อมูลล่าสุดจาก Server เพื่อแก้ปัญหารูปเก่า ⭐
+    try {
+        const profileRes = await fetch(`/api/profile?email=${user.email}`);
+        if (profileRes.ok) {
+            const data = await profileRes.json();
+            const freshUser = data.user;
+
+            // อัปเดต UI Header ให้เป็นปัจจุบัน
+            const headerName = document.getElementById('headerUserName');
+            const menuName = document.getElementById('menuUserName');
+            const avatarHeader = document.getElementById('userAvatarHeader');
+
+            if (headerName) headerName.textContent = freshUser.name;
+            if (menuName) menuName.textContent = freshUser.name;
+            
+            if (avatarHeader) {
+                const newImg = freshUser.image_url || webLogo;
+                avatarHeader.innerHTML = `<img src="${newImg}" onerror="this.src='${webLogo}'" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            }
+
+            // อัปเดต LocalStorage ด้วย (รวมข้อมูลใหม่เข้ากับข้อมูลเดิม)
+            user = { ...user, ...freshUser };
+            localStorage.setItem('easygrowUser', JSON.stringify(user));
+        }
+    } catch (err) {
+        console.warn('Auto-update profile failed:', err);
+    }
 
     // ==========================================
     // ⭐ 3. CENTRALIZED WATERING CHECK (Master Logic) ⭐
     // ==========================================
     // เรียกใช้ฟังก์ชันจาก watering.js เพื่ออัปเดต Badge และเช็ค Pop-up เพียงจุดเดียว
-    // 🔴 แก้ไข: เปลี่ยน true เป็น false เพื่อหยุดการบังคับ Pop-up เด้งทุกครั้ง
     if (window.syncWateringStatus) {
         await window.syncWateringStatus(user.email, false);
     }
